@@ -23,7 +23,9 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "@microsoft/mgt": "*",
+    "axios": "^0.21.0"
   },
   "scripts": {
     "start": "react-scripts start",
