@@ -2,16 +2,15 @@ import { NavigationItem } from '../models/NavigationItem';
 import {
   HomeRegular,
   SearchRegular,
-  TextBulletListSquareRegular,
   CalendarMailRegular,
   DocumentRegular,
-  TagMultipleRegular
+  DocumentBulletListMultiple24Regular
 } from '@fluentui/react-icons';
 import { CalendarPage } from '../pages/CalendarPage';
 import { SearchPage } from '../pages/SearchPage';
 import { HomePage } from '../pages/HomePage';
 import { FilesPage } from '../pages/FilesPage';
-import { TeamsPage } from '../pages/TeamsPage';
+import { ChannelFilesPage } from '../pages/TeamsPage';
 
 export const getNavigation = (isSignedIn: boolean) => {
   let navItems: NavigationItem[] = [];
@@ -46,16 +45,15 @@ export const getNavigation = (isSignedIn: boolean) => {
       component: <FilesPage />,
       exact: true
     });
-
+     
     navItems.push({
       name: 'Teams',
       url: '/teams',
-      pattern: '/search/:query',
-      icon: <DocumentRegular />,
+      icon: <DocumentBulletListMultiple24Regular />,
       key: 'team',
       requiresLogin: true,
-      component: <TeamsPage />,
-      exact: false
+      component: <ChannelFilesPage />,
+      exact: true
     });
 
     navItems.push({
@@ -68,7 +66,6 @@ export const getNavigation = (isSignedIn: boolean) => {
       component: <SearchPage />,
       exact: false
     });
-     
   }
   return navItems;
 };
