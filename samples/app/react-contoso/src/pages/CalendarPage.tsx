@@ -5,19 +5,19 @@ import { useState, useEffect } from 'react';
 import { Providers, ProviderState } from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
+import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular} from '@fluentui/react-icons';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
-import { Icon } from '@fluentui/react/lib/Icon';
 
 import {
     SelectTabData,
     SelectTabEvent,
-    Tab,
-    TabList,
+    Button,
     TabValue,
     shorthands,
     makeStyles,
     mergeClasses
 } from '@fluentui/react-components';
+import { IconButton } from '@fluentui/react';
 
 initializeIcons();
 const useStyles = makeStyles({
@@ -44,7 +44,11 @@ const useStyles = makeStyles({
     navigation: {
         display: 'flex',
         flexDirection: 'column'
-    }
+    },
+    mainButton: {
+    display: 'flex',
+    justifyContent: 'space-between'
+  }
 });
 
 export const CalendarPage: React.FunctionComponent = () => {
@@ -57,8 +61,8 @@ export const CalendarPage: React.FunctionComponent = () => {
     let enddatetimeData = new Date(new Date(MondayGet).setDate(new Date(MondayGet).getDate() + 6)).toISOString().substr(0, 10);
     const [refreshKey, setRefreshKey] = useState(0);
     const [butNex, buttonTime] = useState(1);
-    const [eventQuery, setEnddatetimeData] = useState(enddatetimeData);
-    const [eventQuery2, setStartdatetimeData] = useState(startdatetimeData);
+    const [getEnd, setEnddatetimeData] = useState(enddatetimeData);
+    const [getStart, setStartdatetimeData] = useState(startdatetimeData);
     const [showApiModal, setShowApiModal] = useState(true);
     const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
@@ -66,7 +70,7 @@ export const CalendarPage: React.FunctionComponent = () => {
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
         setSelectedTab(data.value);
     };
-    const token = "";
+
     const [getToken, setToken] = React.useState("");
     Providers.globalProvider.getAccessToken().then(result => {
         // Get token
@@ -76,56 +80,49 @@ export const CalendarPage: React.FunctionComponent = () => {
     });
 
     const handleNextCalendar = () => {
-        const nextDate = new Date(enddatetimeData);
+        const nextDate = new Date(getEnd);
         nextDate.setDate(nextDate.getDate() + 7); //NextWeek
         // setCurrentDate(nextDate);
         buttonTime(1);
-        startdatetimeData = enddatetimeData;
         enddatetimeData = new Date(nextDate).toISOString();
         setEnddatetimeData(enddatetimeData);
-        setStartdatetimeData(startdatetimeData);
+        setStartdatetimeData(getEnd);
         setRefreshKey(refreshKey + 1);
         let apiCo = [{
-            api: "/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + enddatetimeData,
-            type: "GET",
-
-        }]
+            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + getEnd + "&enddatetime=" + enddatetimeData,
+            type: "GET"
+        }];
         getAPIcontent.push(apiCo[0])
-        setHandleRemoveAPI(true);
     };
 
     const handlePreviousCalendar = () => {
-        const previousDate = new Date(startdatetimeData);
+        const previousDate = new Date(getStart);
         previousDate.setDate(previousDate.getDate() - 7); // PreWeek
         // setCurrentDate(previousDate);
         buttonTime(0);
-        enddatetimeData = startdatetimeData;
         startdatetimeData = new Date(previousDate).toISOString();
-        setEnddatetimeData(enddatetimeData);
+        setEnddatetimeData(getStart);
         setStartdatetimeData(startdatetimeData);
         setRefreshKey(refreshKey + 1);
         let apiCo = [{
-            api: "/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + enddatetimeData,
-            type: "GET",
-
-        }]
+            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + getStart,
+            type: "GET"
+        }];
         getAPIcontent.push(apiCo[0])
-        setHandleRemoveAPI(true);
     };
     // 子组件触发父组件
     const APIcontent = (message) => {
         setAPIcontent(getAPIcontent => getAPIcontent.concat(message));
-        setHandleRemoveAPI(true);
     };
+
     //Close APIContent
     const handleRemoveAPI = () => {
         setHandleRemoveAPI(false);
     }
     React.useEffect(() => {
-        console.log('currentDate changed:', currentDate);
-        enddatetimeData = eventQuery;
-        startdatetimeData = eventQuery2;
-    }, [currentDate, butNex, eventQuery, eventQuery2]);
+        enddatetimeData = getEnd;
+        startdatetimeData = getStart;
+    }, [currentDate, butNex, getEnd, getStart]);
     return (
         <>
             <div style={{ display: "flex" }}>
@@ -135,37 +132,33 @@ export const CalendarPage: React.FunctionComponent = () => {
                         description={'Stay productive and navigate your calendar appointments'}
                     ></PageHeader>
                     <div className={styles.container}>
-                        <div className={styles.side}>
-                            <div className={styles.navigation}>
-                                <div>
-                                    <button onClick={handlePreviousCalendar} className="to_left" style={{ width: "200px", lineHeight: "30px", border: "none", backgroundColor: "#6c9ec5", borderRadius: "24px", color: "white", marginLeft: "90px" }}>
-                                        <Icon iconName="ChevronLeft" style={{ marginRight: "5px" }} />
-                                        <span style={{ fontSize: "16px" }}>Previous Week</span>
-                                    </button>
-                                    <button onClick={handleNextCalendar} style={{ float: "right", width: "200px", lineHeight: "30px", border: "none", backgroundColor: "#6c9ec5", borderRadius: "24px", color: "white", marginBottom: "10px", marginRight: "90px" }}>
-                                        <span style={{ fontSize: "16px" }}>Next Week</span>
-                                        <Icon iconName="ChevronRight" style={{ marginLeft: "5px" }} />
-                                    </button>
-                                </div>
-                            </div>
+                        <div className={styles.mainButton}>
+                            <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{fontSize: '20px'}}
+                                onClick={handlePreviousCalendar}
+                            >Previous week</Button>                            
+                            <Button appearance='transparent' style={{fontSize: '20px'}} onClick={()=>{setHandleRemoveAPI(true);}}
+                            >Show API</Button>
+                            <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{float: "right", fontSize: '20px'}} onClick={handleNextCalendar}
+                            >Next week</Button>
+                       </div>
+                        
+                        <div className={mergeClasses(styles.panels, styles.main)}>
                             <Agenda groupByDay={true} id="my-calendar"
-                                key={refreshKey}
-                                eventQuery={`/me/calendarview?$orderby=start/dateTime&startdatetime=${eventQuery2}&enddatetime=${eventQuery}`} >
-                                <CalendarTemplate template="event-other" onEventReceived={APIcontent} ></CalendarTemplate>
+                                    key={refreshKey}
+                                    eventQuery={`/me/calendarview?$orderby=start/dateTime&startdatetime=${getStart}&enddatetime=${getEnd}`} >
+                                    <CalendarTemplate template="event-other" onEventReceived={APIcontent} ></CalendarTemplate>
                             </Agenda>
                         </div>
                     </div>
                 </div>
-                {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "20px" }}>
-                    <button onClick={() => handleRemoveAPI()} style={{ backgroundColor: "#6c9ec5", borderRadius: "10px", color: "white", border: "none" }}>
-                        <Icon iconName="Cancel" />
-                    </button>
+                {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
+                    <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
+                    <p></p>
                     {getAPIcontent.map((tag, index) => (
                         <div key={index}>
-                            {tag.type === 'GET' ? <div style={{ borderBottom: "2px solid #000", paddingBottom: "20px" }}>
+                            {tag.type === 'GET' || tag.type === 'POST' ? <div style={{ borderBottom: "2px solid #000", paddingBottom: "20px" }}>
                                 <span><b>{tag.type}</b></span>
-                                <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>https://graph.microsoft.com/v1.0{tag.api}</p>
-                                <p style={{ margin: "20px 0 0", wordBreak: "break-all" }}></p>
+                                <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>{tag.api}</p>
                             </div> : ""
                             }
                         </div>
@@ -176,7 +169,7 @@ export const CalendarPage: React.FunctionComponent = () => {
     );
 };
 //Click Me_Button
-;
+
 interface CalendarTemplateProps extends MgtTemplateProps {
     onEventReceived: (event: any) => void;
 }
@@ -202,10 +195,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 .version('beta')
                 .filter(`joinWebUrl eq '${joinUrl}'`)
                 .get().then(response => {
-                    console.log(response)
                     const meeting = response.value[0];
                     const userId = meeting.participants.organizer.identity.user.id;
-                    console.log(userId);
                     if (response && response.value.length > 0) {
                         const meeting = response.value[0];
                         const meetingId = meeting.id;
@@ -241,33 +232,31 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             .filter(`joinWebUrl eq '${joinUrl}'`)
             .get();
         apiCon.push({
-            api: "/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
-            type: "GET",
-
-        })
+            api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
+            type: "GET"
+        });
         const meeting = onlineMeetings.value[0];
         const userId = meeting.participants.organizer.identity.user.id;
-        console.log(userId);
 
         if (onlineMeetings && onlineMeetings.value.length > 0) {
             const meeting = onlineMeetings.value[0];
             const meetingId = meeting.id;
             const transcripts = await client.api(`me/onlineMeetings/${meetingId}/transcripts`).version('beta').get();
             apiCon.push({
-                api: "/me/onlineMeetings/" + meetingId + "/transcripts'",
-                type: "GET",
-
-            })
+                api: "https://graph.microsoft.com/beta/me/onlineMeetings/" + meetingId + "/transcripts'",
+                type: "GET"
+            });
             if (transcripts && transcripts.value.length > 0) {
                 const transcriptId = transcripts.value[0].id;
                 const transcriptContentUrl = transcripts.value[0].transcriptContentUrl;
-                console.log(transcriptContentUrl);
-                // 触发父组件
-                onEventReceived(apiCon);
                 //get Summary
                 const axios = require('axios');
                 const getTranscriptContent = async () => {
                     try {
+                        apiCon.push({
+                            api: `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
+                            type: "GET"
+                        });
                         const response = await axios.get(
                             `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             {
@@ -278,7 +267,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             }
                         );
                         const content = response.data;
-                        console.log(content);
                         return content;
                     } catch (error) {
                         console.error(error);
@@ -313,6 +301,11 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         stop: null
                     };
                     try {
+                        apiCon.push({
+                            api: `https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview`,
+                            type: "POST"
+                        });
+                        onEventReceived(apiCon);
                         const response = await axios.post(
                             'https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview',
                             context,
@@ -324,7 +317,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             }
                         );
                         const generatedAnswer = response.data.choices[0].message.content;
-                        console.log(generatedAnswer);
                         alert(generatedAnswer);
                     } catch (error) {
                         console.error(error);
@@ -333,19 +325,21 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 generateSummary();
             } else {
                 console.log('No transcripts found');
+                onEventReceived(apiCon);
                 return null;
             }
         } else {
             console.log('No online meetings found');
             alert('No online meetings found');
+            onEventReceived(apiCon);
             return null;
         }
     };
 
     return (
-        <div style={{ position: "absolute", right: "300px" }} className="clickButton" >
-            {showClickMe && data.valueOf() && <button style={{ width: "70px", height: "30px", border: "none", textAlign: "right", backgroundColor: "#6c9ec5", borderRadius: "24px", color: "white" }}
-                type="submit" onClick={buttonHandler}>Click Me</button>}
+        <div style={{ position: "absolute", right: "300px" }} className="mainButton" >
+            {showClickMe && data.valueOf() && <Button appearance='transparent' style={{ height: "30px", border: "none", borderRadius: "24px", fontSize: "16px"}}
+                type="submit" onClick={buttonHandler}>Click Me</Button>}
         </div>
     );
 };
