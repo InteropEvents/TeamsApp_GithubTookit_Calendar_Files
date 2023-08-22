@@ -46,9 +46,9 @@ const useStyles = makeStyles({
         flexDirection: 'column'
     },
     mainButton: {
-    display: 'flex',
-    justifyContent: 'space-between'
-  }
+        display: 'flex',
+        justifyContent: 'space-between'
+    }
 });
 
 export const CalendarPage: React.FunctionComponent = () => {
@@ -63,7 +63,7 @@ export const CalendarPage: React.FunctionComponent = () => {
     const [butNex, buttonTime] = useState(1);
     const [getEnd, setEnddatetimeData] = useState(enddatetimeData);
     const [getStart, setStartdatetimeData] = useState(startdatetimeData);
-    const [showApiModal, setShowApiModal] = useState(true);
+    const [showApiModal, setShowApiModal] = useState(false);
     const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
     /* const [isTextBoxOpen, setIsTextBoxOpen] = useState(true);*/
@@ -93,6 +93,8 @@ export const CalendarPage: React.FunctionComponent = () => {
             type: "GET"
         }];
         getAPIcontent.push(apiCo[0])
+       
+
     };
 
     const handlePreviousCalendar = () => {
@@ -109,16 +111,22 @@ export const CalendarPage: React.FunctionComponent = () => {
             type: "GET"
         }];
         getAPIcontent.push(apiCo[0])
-    };
+       
+
+    }; 
+
     // 子组件触发父组件
     const APIcontent = (message) => {
         setAPIcontent(getAPIcontent => getAPIcontent.concat(message));
+       
     };
+    
 
-    //Close APIContent
+    //Close And Clear APIContent
     const handleRemoveAPI = () => {
+        setAPIcontent([]);
         setHandleRemoveAPI(false);
-    }
+    } 
     React.useEffect(() => {
         enddatetimeData = getEnd;
         startdatetimeData = getStart;
@@ -133,26 +141,26 @@ export const CalendarPage: React.FunctionComponent = () => {
                     ></PageHeader>
                     <div className={styles.container}>
                         <div className={styles.mainButton}>
-                            <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{fontSize: '20px'}}
+                            <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{ fontSize: '20px' }}
                                 onClick={handlePreviousCalendar}
-                            >Previous week</Button>                            
-                            <Button appearance='transparent' style={{fontSize: '20px'}} onClick={()=>{setHandleRemoveAPI(true);}}
+                            >Previous week</Button>
+                            <Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}
                             >Show API</Button>
-                            <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{float: "right", fontSize: '20px'}} onClick={handleNextCalendar}
+                            <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{ float: "right", fontSize: '20px' }} onClick={handleNextCalendar}
                             >Next week</Button>
-                       </div>
-                        
+                        </div>
                         <div className={mergeClasses(styles.panels, styles.main)}>
                             <Agenda groupByDay={true} id="my-calendar"
-                                    key={refreshKey}
-                                    eventQuery={`/me/calendarview?$orderby=start/dateTime&startdatetime=${getStart}&enddatetime=${getEnd}`} >
-                                    <CalendarTemplate template="event-other" onEventReceived={APIcontent} ></CalendarTemplate>
+                                key={refreshKey}
+                                eventQuery={`/me/calendarview?$orderby=start/dateTime&startdatetime=${getStart}&enddatetime=${getEnd}`} >
+                                <CalendarTemplate template="event-other" onEventReceived={APIcontent} ></CalendarTemplate>
                             </Agenda>
                         </div>
                     </div>
                 </div>
                 {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
                     <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
+                    <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
                     <p></p>
                     {getAPIcontent.map((tag, index) => (
                         <div key={index}>
@@ -175,7 +183,7 @@ interface CalendarTemplateProps extends MgtTemplateProps {
 }
 const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, dataContext }) => {
     const currentEvent = dataContext.event;
-    const [data, setData] = useState(true);
+    const [data, setData] = useState(false);
     let showClickMe = currentEvent.location.uniqueId === "Microsoft Teams Meeting";
     Providers.globalProvider.setState(ProviderState.SignedIn);
     // Get Token
@@ -201,12 +209,10 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         const meeting = response.value[0];
                         const meetingId = meeting.id;
                         const transcripts = client.api(`me/onlineMeetings/${meetingId}/transcripts`).version('beta').get().then(responses => {
-                            if (responses.value.length === 0) {
-                                setData(false);
+                            if (responses.value.length > 0) {
+                                setData(true);
                             }
                         });
-                    } else {
-                        setData(true);
                     }
                 })
         }
@@ -309,7 +315,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         const response = await axios.post(
                             'https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview',
                             context,
-                            { 
+                            {
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'api-key': '5402ecbeeab345b2ae7f52cd1bbe8b46'
@@ -337,9 +343,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
     };
 
     return (
-        <div style={{ position: "absolute", right: "300px" }} className="mainButton" >
-            {showClickMe && data.valueOf() && <Button appearance='transparent' style={{ height: "30px", border: "none", borderRadius: "24px", fontSize: "16px"}}
-                type="submit" onClick={buttonHandler}>Click Me</Button>}
+        <div style={{ position: "absolute", right: "300px" }} className="clickButton" >
+            {showClickMe && data.valueOf() && <button style={{ fontSize: '20px', color: 'black', width: "100px", height: "30px", border: "none", textAlign: "right", backgroundColor: "#dadada", borderRadius: "24px" }}
+                type="submit" onClick={buttonHandler}>Click Me</button>}
         </div>
     );
 };

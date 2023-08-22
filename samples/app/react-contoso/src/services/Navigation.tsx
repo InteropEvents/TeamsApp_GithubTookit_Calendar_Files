@@ -1,15 +1,12 @@
 import { NavigationItem } from '../models/NavigationItem';
 import {
   HomeRegular,
-  SearchRegular,
   CalendarMailRegular,
   DocumentRegular,
   DocumentBulletListMultiple24Regular
 } from '@fluentui/react-icons';
 import { CalendarPage } from '../pages/CalendarPage';
-import { SearchPage } from '../pages/SearchPage';
 import { HomePage } from '../pages/HomePage';
-import { FilesPage } from '../pages/FilesPage';
 import { ChannelFilesPage } from '../pages/TeamsPage';
 
 export const getNavigation = (isSignedIn: boolean) => {
@@ -37,16 +34,6 @@ export const getNavigation = (isSignedIn: boolean) => {
     });
 
     navItems.push({
-      name: 'Files',
-      url: '/files',
-      icon: <DocumentRegular />,
-      key: 'files',
-      requiresLogin: true,
-      component: <FilesPage />,
-      exact: true
-    });
-     
-    navItems.push({
       name: 'Teams',
       url: '/teams',
       icon: <DocumentBulletListMultiple24Regular />,
@@ -56,16 +43,6 @@ export const getNavigation = (isSignedIn: boolean) => {
       exact: true
     });
 
-    navItems.push({
-      name: 'Search',
-      url: '/search',
-      pattern: '/search/:query',
-      icon: <SearchRegular />,
-      key: 'search',
-      requiresLogin: true,
-      component: <SearchPage />,
-      exact: false
-    });
   }
   return navItems;
 };

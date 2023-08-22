@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import { Header } from './components/Header';
 import { SideNavigation } from './components/SideNavigation';
@@ -10,6 +10,8 @@ import { FluentProvider, makeStyles, mergeClasses, shorthands } from '@fluentui/
 import { tokens } from '@fluentui/react-theme';
 import { applyTheme } from '@microsoft/mgt-react';
 import { useAppContext } from './AppContext';
+import { IconButton } from '@fluentui/react';
+import { useState, useEffect } from 'react';
 
 const useStyles = makeStyles({
   sidebar: {
@@ -50,10 +52,18 @@ const useStyles = makeStyles({
 });
 
 export const Layout: React.FunctionComponent = theme => {
-  const styles = useStyles();
+    const styles = useStyles();
+
   const [navigationItems, setNavigationItems] = React.useState<NavigationItem[]>([]);
   const [isSignedIn] = useIsSignedIn();
-  const appContext = useAppContext();
+    const appContext = useAppContext();
+    const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
+    const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
+
+    const handleRemoveAPI = () => {
+        setAPIcontent([]);
+        setHandleRemoveAPI(false);
+    }
 
   React.useEffect(() => {
     setNavigationItems(getNavigation(isSignedIn));
@@ -83,13 +93,34 @@ export const Layout: React.FunctionComponent = theme => {
                 {navigationItems.map(
                   item =>
                     ((item.requiresLogin && isSignedIn) || !item.requiresLogin) && (
-                      <Route exact={item.exact} path={item.url} children={item.component} key={item.key} />
+
+                            <Route exact={item.exact} path={item.url} children={item.component} key={item.key}
+                          
+                            />
                     )
                 )}
                 <Route path="*" component={HomePage} />
               </Switch>
-            </div>
+                      </div>
+                      {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
+                          <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
+                          <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
+                          <p></p>
+                          {getAPIcontent.map((tag, index) => (
+                              <div key={index}>
+                                  {tag.type === 'GET' || tag.type === 'POST' ? <div style={{ borderBottom: "2px solid #000", paddingBottom: "20px" }}>
+                                      <span><b>{tag.type}</b></span>
+                                      <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>{tag.api}</p>
+                                  </div> : ""
+                                  }
+                              </div>
+                          ))}
+                      </div>}
+
+
+
           </div>
+
         </HashRouter>
       </div>
     </FluentProvider>
