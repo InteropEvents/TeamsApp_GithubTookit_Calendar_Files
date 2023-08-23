@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Providers, ProviderState } from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
-import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular} from '@fluentui/react-icons';
+import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular } from '@fluentui/react-icons';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 
 import {
@@ -18,6 +18,7 @@ import {
     mergeClasses
 } from '@fluentui/react-components';
 import { IconButton } from '@fluentui/react';
+import PubSub from 'pubsub-js';
 
 initializeIcons();
 const useStyles = makeStyles({
@@ -93,8 +94,8 @@ export const CalendarPage: React.FunctionComponent = () => {
             type: "GET"
         }];
         getAPIcontent.push(apiCo[0])
-       
 
+        PubSub.publish("updateToastProps", apiCo);
     };
 
     const handlePreviousCalendar = () => {
@@ -111,26 +112,22 @@ export const CalendarPage: React.FunctionComponent = () => {
             type: "GET"
         }];
         getAPIcontent.push(apiCo[0])
-       
-
-    }; 
-
+        PubSub.publish("updateToastProps", apiCo);
+    };
     // 子组件触发父组件
     const APIcontent = (message) => {
         setAPIcontent(getAPIcontent => getAPIcontent.concat(message));
-       
     };
-    
-
     //Close And Clear APIContent
     const handleRemoveAPI = () => {
         setAPIcontent([]);
         setHandleRemoveAPI(false);
-    } 
+    }
     React.useEffect(() => {
         enddatetimeData = getEnd;
         startdatetimeData = getStart;
     }, [currentDate, butNex, getEnd, getStart]);
+
     return (
         <>
             <div style={{ display: "flex" }}>
@@ -241,6 +238,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
             type: "GET"
         });
+        PubSub.publish("updateToastProps", apiCon);
         const meeting = onlineMeetings.value[0];
         const userId = meeting.participants.organizer.identity.user.id;
 
@@ -252,6 +250,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 api: "https://graph.microsoft.com/beta/me/onlineMeetings/" + meetingId + "/transcripts'",
                 type: "GET"
             });
+            PubSub.publish("updateToastProps", apiCon);
             if (transcripts && transcripts.value.length > 0) {
                 const transcriptId = transcripts.value[0].id;
                 const transcriptContentUrl = transcripts.value[0].transcriptContentUrl;
@@ -263,6 +262,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             api: `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             type: "GET"
                         });
+                        PubSub.publish("updateToastProps", apiCon);
                         const response = await axios.get(
                             `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             {
@@ -332,7 +332,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             } else {
                 console.log('No transcripts found');
                 onEventReceived(apiCon);
-                return null;
             }
         } else {
             console.log('No online meetings found');
@@ -343,9 +342,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
     };
 
     return (
-        <div style={{ position: "absolute", right: "300px" }} className="clickButton" >
-            {showClickMe && data.valueOf() && <button style={{ fontSize: '20px', color: 'black', width: "100px", height: "30px", border: "none", textAlign: "right", backgroundColor: "#dadada", borderRadius: "24px" }}
-                type="submit" onClick={buttonHandler}>Click Me</button>}
+        <div style={{ position: "absolute", right: "0", top: "50%", transform: "translateY(-50%)" }} className="clickButton" >
+            {showClickMe && data.valueOf() && <button style={{ fontSize: '20px', color: 'black', width: "200px", height: "30px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }}
+                type="submit" onClick={buttonHandler}>Metting Summary</button>}
         </div>
     );
 };

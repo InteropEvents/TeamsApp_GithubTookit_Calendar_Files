@@ -75,21 +75,23 @@ export const Layout: React.FunctionComponent = theme => {
   }, [appContext]);
 
   return (
-    <FluentProvider theme={appContext.state.theme.fluentTheme}>
-      <div className={styles.page}>
-        <HashRouter>
-          <Header></Header>
-          <div className={styles.main}>
+      <FluentProvider theme={appContext.state.theme.fluentTheme}  >
+          <div className={styles.page} >
+              <HashRouter >
+          <Header ></Header>
+          <div className={styles.main}  >
             <div
               className={mergeClasses(
                 styles.sidebar,
-                `${appContext.state.sidebar.isMinimized ? styles.minimized : ''}`
-              )}
+                  `${appContext.state.sidebar.isMinimized ? styles.minimized : ''}`
+
+              )
+          }
             >
               <SideNavigation items={navigationItems}></SideNavigation>
-            </div>
-            <div className={styles.content}>
-              <Switch>
+                      </div>
+                      <div className={styles.content} >
+              <Switch >
                 {navigationItems.map(
                   item =>
                     ((item.requiresLogin && isSignedIn) || !item.requiresLogin) && (

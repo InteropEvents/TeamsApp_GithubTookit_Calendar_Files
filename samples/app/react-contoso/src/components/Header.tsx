@@ -1,4 +1,4 @@
-import * as React from 'react';
+﻿import * as React from 'react';
 import { Login, SearchBox } from '@microsoft/mgt-react';
 import { PACKAGE_VERSION } from '@microsoft/mgt-element';
 import { InfoButton } from '@fluentui/react-components/unstable';
@@ -139,31 +139,32 @@ const HeaderComponent: React.FunctionComponent = () => {
   }, [location, setAppContext]);
 
   return (
-    <div className={styles.header}>
-      <div className={styles.waffle}>
-        <div className={styles.waffleLogo}>
-          <a href={'https://www.office.com/apps?auth=2'} target="_blank" rel="noreferrer">
-            <GridDotsRegular className={styles.wafffleIcon} />
-          </a>
-        </div>
-
-        <div className={styles.waffleTitle}>
-          <Label className={styles.name}>{process.env.REACT_APP_SITE_NAME} </Label>
-          <InfoButton
-            className={styles.infoIcon}
-            size="medium"
-            info={<>Using the Graph Toolkit v{PACKAGE_VERSION}</>}
-          />
-        </div>
+    <div className={styles.header} >
+      <div className={styles.waffle} >
+              <div className={styles.waffleLogo} >
+                  <a href={'https://www.office.com/apps?auth=2'} target="_blank" rel="noreferrer">
+                      <GridDotsRegular className={styles.wafffleIcon} />
+                  </a>
+              </div>
+              {/*显示左侧的字体*/}
+              <div className={styles.waffleTitle} >
+                  <Label className={styles.name} >{process.env.REACT_APP_SITE_NAME} </Label>
+                  <InfoButton
+                      className={styles.infoIcon}
+                      size="medium"
+                      info={<>Using the Graph Toolkit v{PACKAGE_VERSION}</>}
+                  />
+              </div>
+        
       </div>
-      <div className={styles.login}>
-        <ThemeSwitcher />
-        <div className={mergeClasses(!isSignedIn ? styles.signedOut : styles.signedIn, styles.root)}>
-          <Login>
-            <SimpleLogin template="signed-in-button-content" />
-          </Login>
-        </div>
-      </div>
+          <div className={styles.login} style={{ display: "flex", justifyContent: "flex-end" }}>
+              <ThemeSwitcher />
+              <div className={mergeClasses(!isSignedIn ? styles.signedOut : styles.signedIn, styles.root)}>
+                  <Login>
+                      <SimpleLogin template="signed-in-button-content" />
+                  </Login>
+              </div>
+          </div>
     </div>
   );
 };
