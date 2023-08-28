@@ -19,6 +19,8 @@ import { write } from 'fs';
 import PubSub from 'pubsub-js';
 import { Providers, ProviderState } from '@microsoft/mgt';
 
+
+
 const availableThemes = [
     {
         key: 'light',
@@ -56,7 +58,7 @@ export const ThemeSwitcher = () => {
     const [getStart, setStartdatetimeData] = useState(startdatetimeData);
     const [butNex, buttonTime] = useState(1);
     const [refreshKey, setRefreshKey] = useState(0);
-
+    /*    const [width, setWidth] = useState("100%");*/
     // 子组件触发父组件
     //const APIcontent = (message) => {
     //    setAPIcontent(getAPIcontent => getAPIcontent.concat(message));
@@ -81,7 +83,12 @@ export const ThemeSwitcher = () => {
     const handleRemoveAPI = () => {
         setAPIcontent([]);
         setHandleRemoveAPI(false);
+       
     }
+    //const handleButtonClick = () => {
+    //    setHandleRemoveAPI(true);
+    //    setWidth("55%");
+    //};
     const onThemeChanged = (theme: any) => {
         setSelectedTheme(theme);
         // Applies the theme to the Fluent UI components
@@ -114,9 +121,9 @@ export const ThemeSwitcher = () => {
     };
 
     return (
+   
         <div>
-            <MenuButton appearance='transparent' style={{ fontSize: '13px', backgroundColor: '#ffffff', color: 'black' }} onClick={() => { setHandleRemoveAPI(true); }}
-            >Show API</MenuButton>
+            
             <Menu>
                 <MenuTrigger>
                     <MenuButton icon={selectedTheme.icon}>{selectedTheme.displayName}</MenuButton>
@@ -146,6 +153,7 @@ export const ThemeSwitcher = () => {
                 ))}
             </div>}
             );
-        </div>
+            </div>
+       
     );
 };

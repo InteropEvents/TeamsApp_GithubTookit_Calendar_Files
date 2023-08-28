@@ -10,6 +10,7 @@ import { useAppContext } from '../AppContext';
 import { Label, makeStyles, mergeClasses, shorthands, tokens } from '@fluentui/react-components';
 import { GridDotsRegular } from '@fluentui/react-icons';
 import { useLocation } from 'react-router-dom';
+import { Layout } from '../Layout';
 
 const useStyles = makeStyles({
   root: {
@@ -156,9 +157,12 @@ const HeaderComponent: React.FunctionComponent = () => {
                   />
               </div>
         
-      </div>
+          </div>
+      {/*移到最右侧*/}
           <div className={styles.login} style={{ display: "flex", justifyContent: "flex-end" }}>
+              
               <ThemeSwitcher />
+             
               <div className={mergeClasses(!isSignedIn ? styles.signedOut : styles.signedIn, styles.root)}>
                   <Login>
                       <SimpleLogin template="signed-in-button-content" />

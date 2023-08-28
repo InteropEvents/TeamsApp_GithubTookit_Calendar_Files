@@ -12,7 +12,9 @@ import { applyTheme } from '@microsoft/mgt-react';
 import { useAppContext } from './AppContext';
 import { IconButton } from '@fluentui/react';
 import { useState, useEffect } from 'react';
-
+import {   
+    MenuButton,
+} from '@fluentui/react-components';
 const useStyles = makeStyles({
   sidebar: {
     display: 'flex',
@@ -59,26 +61,52 @@ export const Layout: React.FunctionComponent = theme => {
     const appContext = useAppContext();
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
     const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
-
     const handleRemoveAPI = () => {
         setAPIcontent([]);
         setHandleRemoveAPI(false);
     }
 
   React.useEffect(() => {
-    setNavigationItems(getNavigation(isSignedIn));
+      setNavigationItems(getNavigation(isSignedIn));
+      const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
+          setAPIcontent(data);
+          console.log(data)
+
+      });
+      return () => {
+          PubSub.unsubscribe(subscriptionToken);
+      };
   }, [isSignedIn]);
 
-  React.useEffect(() => {
-    // Applies the theme to the MGT components
-    applyTheme(appContext.state.theme.key as any);
-  }, [appContext]);
-
+    React.useEffect(() => {
+        // Applies the theme to the MGT components
+        applyTheme(appContext.state.theme.key as any);
+    }, [appContext]);
   return (
       <FluentProvider theme={appContext.state.theme.fluentTheme}  >
           <div className={styles.page} >
+             
               <HashRouter >
-          <Header ></Header>
+                 
+                  <div style={{ position: 'relative' }}>
+                  <p></p>
+                      <MenuButton
+                          appearance='transparent'
+                          style={{
+                              position: 'absolute',
+                              top: '23px',
+                              right: '190px',
+                              fontSize: '13px',
+                              backgroundColor: '#ffffff',
+                              color: 'black'
+                          }}
+                          onClick={() => { setHandleRemoveAPI(true); }}
+                      >
+                          Show API
+                      </MenuButton>
+                      <Header></Header>
+                  </div>
+
           <div className={styles.main}  >
             <div
               className={mergeClasses(
@@ -104,7 +132,7 @@ export const Layout: React.FunctionComponent = theme => {
                 <Route path="*" component={HomePage} />
               </Switch>
                       </div>
-                      {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
+                      {getHandleRemoveAPI && <div style={{  width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
                           <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
                           <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
                           <p></p>
@@ -118,8 +146,6 @@ export const Layout: React.FunctionComponent = theme => {
                               </div>
                           ))}
                       </div>}
-
-
 
           </div>
 
