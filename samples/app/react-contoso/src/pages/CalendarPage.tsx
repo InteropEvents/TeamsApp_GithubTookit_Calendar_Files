@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Providers, ProviderState } from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
-import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular } from '@fluentui/react-icons';
+import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular} from '@fluentui/react-icons';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 
 import {
@@ -94,8 +94,8 @@ export const CalendarPage: React.FunctionComponent = () => {
             type: "GET"
         }];
         getAPIcontent.push(apiCo[0])
-
-        PubSub.publish("updateToastProps", apiCo);
+       
+        PubSub.publish("updateToastProps", [...getAPIcontent]);
     };
 
     const handlePreviousCalendar = () => {
@@ -107,22 +107,30 @@ export const CalendarPage: React.FunctionComponent = () => {
         setEnddatetimeData(getStart);
         setStartdatetimeData(startdatetimeData);
         setRefreshKey(refreshKey + 1);
-        let apiCo = [{
-            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + getStart,
-            type: "GET"
-        }];
+        let apiCo = [
+            {
+                api:
+                    "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" +
+                    startdatetimeData +
+                    "&enddatetime=" +
+                    getStart,
+                type: "GET",
+            },
+        ];
         getAPIcontent.push(apiCo[0])
-        PubSub.publish("updateToastProps", apiCo);
+        PubSub.publish("updateToastProps", [...getAPIcontent]);
     };
+
     // 子组件触发父组件
     const APIcontent = (message) => {
-        setAPIcontent(getAPIcontent => getAPIcontent.concat(message));
+        setAPIcontent((getAPIcontent) => [...getAPIcontent, ...message]);
     };
-    //Close And Clear APIContent
+
+    // Close And Clear APIContent
     const handleRemoveAPI = () => {
         setAPIcontent([]);
         setHandleRemoveAPI(false);
-    }
+    };
     React.useEffect(() => {
         enddatetimeData = getEnd;
         startdatetimeData = getStart;
@@ -141,11 +149,12 @@ export const CalendarPage: React.FunctionComponent = () => {
                             <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{ fontSize: '20px' }}
                                 onClick={handlePreviousCalendar}
                             >Previous week</Button>
-                            <Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}
-                            >Show API</Button>
+                            {/*<Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}*/}
+                            {/*>Show API</Button>*/}
                             <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{ float: "right", fontSize: '20px' }} onClick={handleNextCalendar}
                             >Next week</Button>
                         </div>
+                        
                         <div className={mergeClasses(styles.panels, styles.main)}>
                             <Agenda groupByDay={true} id="my-calendar"
                                 key={refreshKey}
@@ -216,6 +225,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
     }, []);
 
     const buttonHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
+       
         let apiCon: Array<{ api: string; type: string; }> = [];
         event.preventDefault();
         Providers.globalProvider.setState(ProviderState.SignedIn);
