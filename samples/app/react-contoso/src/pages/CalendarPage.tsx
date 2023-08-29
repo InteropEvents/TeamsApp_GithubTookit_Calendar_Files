@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Providers, ProviderState} from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
-import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular } from '@fluentui/react-icons';
+import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular, ChevronDown48Regular } from '@fluentui/react-icons';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 
 import {
@@ -70,7 +70,9 @@ export const CalendarPage: React.FunctionComponent = () => {
     const [currentDate, setCurrentDate] = React.useState<Date>(new Date());
     const nextDateItme = new Date();
     const MondayGet = nextDateItme.setDate(nextDateItme.getDate() - nextDateItme.getDay() + 1)
-    let startdatetimeData = new Date(MondayGet).toISOString().substr(0, 10);
+    const today = new Date();
+    let startdatetimeData = today.toISOString().substr(0, 10);
+    //let startdatetimeData = new Date(MondayGet).toISOString().substr(0, 10);
     let enddatetimeData = new Date(new Date(MondayGet).setDate(new Date(MondayGet).getDate() + 6)).toISOString().substr(0, 10);
     const [refreshKey, setRefreshKey] = useState(0);
     const [butNex, buttonTime] = useState(1);
@@ -133,6 +135,20 @@ export const CalendarPage: React.FunctionComponent = () => {
         PubSub.publish("updateToastProps", [...getAPIcontent]);
     };
 
+    const handleToday = () => {
+        let startdatetimeData = today.toISOString().substr(0, 10);
+        setStartdatetimeData(startdatetimeData);
+        let enddatetimeData = new Date(new Date(MondayGet).setDate(new Date(MondayGet).getDate() + 6)).toISOString().substr(0, 10);
+        setEnddatetimeData(enddatetimeData);
+        setRefreshKey(refreshKey + 1);
+        let apiCo = [{
+            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + getStart,
+            type: "GET"
+        }];
+        getAPIcontent.push(apiCo[0])
+        PubSub.publish("updateToastProps", [...getAPIcontent]);
+    }
+
     // 子组件触发父组件
     const APIcontent = (message) => {
         setAPIcontent((getAPIcontent) => [...getAPIcontent, ...message]);
@@ -162,8 +178,8 @@ export const CalendarPage: React.FunctionComponent = () => {
                             <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{ fontSize: '20px' }}
                                 onClick={handlePreviousCalendar}
                             >Previous week</Button>
-                            {/*<Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}*/}
-                            {/*>Show API</Button>*/}
+                            <Button appearance='transparent' style={{ fontSize: '20px' }} icon={<ChevronDown48Regular />} onClick={handleToday}
+                            >Today</Button>
                             <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{ float: "right", fontSize: '20px' }} onClick={handleNextCalendar}
                             >Next week</Button>
                         </div>
@@ -337,7 +353,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         console.log('Failed to retrieve transcript content');
                         return;
                     } else {
-                        console.log('Successfully to gettranscriptContent');
+                        console.log('Successfully get transcript content');
                     }
                     const context = {
                         messages: [
