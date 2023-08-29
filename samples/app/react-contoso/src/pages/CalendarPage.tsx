@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Providers, ProviderState } from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
-import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular} from '@fluentui/react-icons';
+import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular } from '@fluentui/react-icons';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
 
 import {
@@ -17,7 +17,8 @@ import {
     makeStyles,
     mergeClasses
 } from '@fluentui/react-components';
-import { IconButton } from '@fluentui/react';
+import { IconButton, ProgressIndicator } from '@fluentui/react';
+
 import PubSub from 'pubsub-js';
 
 initializeIcons();
@@ -50,6 +51,7 @@ const useStyles = makeStyles({
         display: 'flex',
         justifyContent: 'space-between'
     }
+
 });
 
 export const CalendarPage: React.FunctionComponent = () => {
@@ -67,7 +69,7 @@ export const CalendarPage: React.FunctionComponent = () => {
     const [showApiModal, setShowApiModal] = useState(false);
     const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
-    /* const [isTextBoxOpen, setIsTextBoxOpen] = useState(true);*/
+
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
         setSelectedTab(data.value);
     };
@@ -94,7 +96,7 @@ export const CalendarPage: React.FunctionComponent = () => {
             type: "GET"
         }];
         getAPIcontent.push(apiCo[0])
-       
+
         PubSub.publish("updateToastProps", [...getAPIcontent]);
     };
 
@@ -131,6 +133,7 @@ export const CalendarPage: React.FunctionComponent = () => {
         setAPIcontent([]);
         setHandleRemoveAPI(false);
     };
+
     React.useEffect(() => {
         enddatetimeData = getEnd;
         startdatetimeData = getStart;
@@ -149,12 +152,12 @@ export const CalendarPage: React.FunctionComponent = () => {
                             <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{ fontSize: '20px' }}
                                 onClick={handlePreviousCalendar}
                             >Previous week</Button>
-                            {/*<Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}*/}
-                            {/*>Show API</Button>*/}
+                            <Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}
+                            >Show API</Button>
                             <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{ float: "right", fontSize: '20px' }} onClick={handleNextCalendar}
                             >Next week</Button>
                         </div>
-                        
+
                         <div className={mergeClasses(styles.panels, styles.main)}>
                             <Agenda groupByDay={true} id="my-calendar"
                                 key={refreshKey}
@@ -188,9 +191,12 @@ interface CalendarTemplateProps extends MgtTemplateProps {
     onEventReceived: (event: any) => void;
 }
 const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, dataContext }) => {
+
+    const [isLoading, setIsLoading] = useState(false); //Loading...
     const currentEvent = dataContext.event;
     const [data, setData] = useState(false);
     let showClickMe = currentEvent.location.uniqueId === "Microsoft Teams Meeting";
+
     Providers.globalProvider.setState(ProviderState.SignedIn);
     // Get Token
     const token = Providers.globalProvider.getAccessToken();
@@ -225,7 +231,17 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
     }, []);
 
     const buttonHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
-       
+
+        setIsLoading(true);
+        // 模拟异步请求
+        setTimeout(() => {
+            // 获取到数据后停止转圈效果
+            setIsLoading(false);
+            // 处理数据
+            if (data) {
+                setIsLoading(false);
+            }
+        }, 8500);
         let apiCon: Array<{ api: string; type: string; }> = [];
         event.preventDefault();
         Providers.globalProvider.setState(ProviderState.SignedIn);
@@ -333,7 +349,47 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             }
                         );
                         const generatedAnswer = response.data.choices[0].message.content;
-                        alert(generatedAnswer);
+                        const customAlert = (content) => {
+                            const dialog = document.createElement('div');
+                            dialog.style.backgroundColor = '#e6e6e6';
+                            dialog.style.width = '700px';
+                            dialog.style.padding = '20px';
+                            dialog.style.color = 'black';
+                            dialog.style.position = 'fixed';
+                            dialog.style.top = '10%';
+                            dialog.style.left = '50%';
+                            dialog.style.transform = 'translate(-50%, -50%)';
+                            dialog.style.display = 'flex';
+                            dialog.style.flexDirection = 'column';
+                            dialog.style.justifyContent = 'center';
+                            dialog.style.alignItems = 'center';
+                            dialog.style.borderRadius = '24px';
+
+                            const title = document.createElement('h3');
+                            title.textContent = 'Open AI says';
+                            title.style.fontWeight = 'bold';
+                            title.style.marginBottom = '5px';
+
+                            const text = document.createElement('span');
+                            text.textContent = content;
+
+                            const button = document.createElement('button');
+                            button.textContent = 'OK';
+                            button.style.marginLeft = 'auto';
+                            button.style.marginTop = '20px';
+                            button.style.borderRadius = '10px';
+                            button.addEventListener('click', () => {
+                                document.body.removeChild(dialog);
+                            });
+
+                            dialog.appendChild(title);
+                            dialog.appendChild(text);
+                            dialog.appendChild(button);
+                            document.body.appendChild(dialog);
+                        };
+
+                        customAlert(generatedAnswer);
+
                     } catch (error) {
                         console.error(error);
                     }
@@ -353,8 +409,16 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
 
     return (
         <div style={{ position: "absolute", right: "0", top: "50%", transform: "translateY(-50%)" }} className="clickButton" >
-            {showClickMe && data.valueOf() && <button style={{ fontSize: '20px', color: 'black', width: "200px", height: "30px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }}
-                type="submit" onClick={buttonHandler}>Metting Summary</button>}
+            {showClickMe && data.valueOf() && (
+                <button style={{ fontSize: '20px', color: 'black', width: "200px", height: "30px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }}
+                    type="submit" onClick={buttonHandler}>
+                    {isLoading ? (
+                        <ProgressIndicator label="Loading..." />
+                    ) : (
+                        "Meeting Summary"
+                    )}
+                </button>
+            )}
         </div>
     );
 };

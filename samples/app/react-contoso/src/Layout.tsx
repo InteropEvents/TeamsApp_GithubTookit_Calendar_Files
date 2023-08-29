@@ -12,7 +12,7 @@ import { applyTheme } from '@microsoft/mgt-react';
 import { useAppContext } from './AppContext';
 import { IconButton } from '@fluentui/react';
 import { useState, useEffect } from 'react';
-import {   
+import {
     MenuButton,
 } from '@fluentui/react-components';
 const useStyles = makeStyles({
@@ -56,101 +56,104 @@ const useStyles = makeStyles({
 export const Layout: React.FunctionComponent = theme => {
     const styles = useStyles();
 
-  const [navigationItems, setNavigationItems] = React.useState<NavigationItem[]>([]);
-  const [isSignedIn] = useIsSignedIn();
+    const [navigationItems, setNavigationItems] = React.useState<NavigationItem[]>([]);
+    const [isSignedIn] = useIsSignedIn();
     const appContext = useAppContext();
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
     const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
     const handleRemoveAPI = () => {
-        setAPIcontent([]);
-        setHandleRemoveAPI(false);
+        if (getAPIcontent.length > 0) {
+            setAPIcontent([]);
+            setHandleRemoveAPI(false);
+            console.log("API content cleared!");
+        }
     }
 
-  React.useEffect(() => {
-      setNavigationItems(getNavigation(isSignedIn));
-      const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
-          setAPIcontent(data);
-          console.log(data)
+    React.useEffect(() => {
+        setNavigationItems(getNavigation(isSignedIn));
+        const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
+            setAPIcontent(data);
+            console.log(data)
 
-      });
-      return () => {
-          PubSub.unsubscribe(subscriptionToken);
-      };
-  }, [isSignedIn]);
+        });
+        return () => {
+            PubSub.unsubscribe(subscriptionToken);
+        };
+    }, [isSignedIn]);
 
     React.useEffect(() => {
         // Applies the theme to the MGT components
         applyTheme(appContext.state.theme.key as any);
     }, [appContext]);
-  return (
-      <FluentProvider theme={appContext.state.theme.fluentTheme}  >
-          <div className={styles.page} >
-             
-              <HashRouter >
-                 
-                  <div style={{ position: 'relative' }}>
-                  <p></p>
-                      <MenuButton
-                          appearance='transparent'
-                          style={{
-                              position: 'absolute',
-                              top: '23px',
-                              right: '190px',
-                              fontSize: '13px',
-                              backgroundColor: '#ffffff',
-                              color: 'black'
-                          }}
-                          onClick={() => { setHandleRemoveAPI(true); }}
-                      >
-                          Show API
-                      </MenuButton>
-                      <Header></Header>
-                  </div>
+    return (
+        <FluentProvider theme={appContext.state.theme.fluentTheme}  >
+            <div className={styles.page} >
 
-          <div className={styles.main}  >
-            <div
-              className={mergeClasses(
-                styles.sidebar,
-                  `${appContext.state.sidebar.isMinimized ? styles.minimized : ''}`
+                <HashRouter >
 
-              )
-          }
-            >
-              <SideNavigation items={navigationItems}></SideNavigation>
-                      </div>
-                      <div className={styles.content} >
-              <Switch >
-                {navigationItems.map(
-                  item =>
-                    ((item.requiresLogin && isSignedIn) || !item.requiresLogin) && (
+                    <div style={{ position: 'relative' }}>
+                        <p></p>
+                        <MenuButton
+                            appearance='transparent'
+                            style={{
+                                position: 'absolute',
+                                top: '23px',
+                                right: '190px',
+                                fontSize: '13px',
+                                backgroundColor: '#ffffff',
+                                color: 'black'
+                            }}
+                            onClick={() => { setHandleRemoveAPI(true); }}
+                        >
+                            Show API
+                        </MenuButton>
+                        <Header></Header>
+                    </div>
 
-                            <Route exact={item.exact} path={item.url} children={item.component} key={item.key}
-                          
-                            />
-                    )
-                )}
-                <Route path="*" component={HomePage} />
-              </Switch>
-                      </div>
-                      {getHandleRemoveAPI && <div style={{  width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
-                          <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
-                          <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
-                          <p></p>
-                          {getAPIcontent.map((tag, index) => (
-                              <div key={index}>
-                                  {tag.type === 'GET' || tag.type === 'POST' ? <div style={{ borderBottom: "2px solid #000", paddingBottom: "20px" }}>
-                                      <span><b>{tag.type}</b></span>
-                                      <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>{tag.api}</p>
-                                  </div> : ""
-                                  }
-                              </div>
-                          ))}
-                      </div>}
+                    <div className={styles.main}  >
+                        <div
+                            className={mergeClasses(
+                                styles.sidebar,
+                                `${appContext.state.sidebar.isMinimized ? styles.minimized : ''}`
 
-          </div>
+                            )
+                            }
+                        >
+                            <SideNavigation items={navigationItems}></SideNavigation>
+                        </div>
+                        <div className={styles.content} >
+                            <Switch >
+                                {navigationItems.map(
+                                    item =>
+                                        ((item.requiresLogin && isSignedIn) || !item.requiresLogin) && (
 
-        </HashRouter>
-      </div>
-    </FluentProvider>
-  );
+                                            <Route exact={item.exact} path={item.url} children={item.component} key={item.key}
+
+                                            />
+                                        )
+                                )}
+                                <Route path="*" component={HomePage} />
+                            </Switch>
+                        </div>
+                        {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px" }}>
+                            <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
+                            <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
+                            <p></p>
+                            {getAPIcontent.map((tag, index) => (
+                                <div key={index}>
+                                    {tag.type === 'GET' || tag.type === 'POST' ? <div style={{ borderBottom: "2px solid  #ccc", paddingBottom: "20px" }}>
+                                        <span><b>{tag.type}</b></span>
+                                        <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>{tag.api}</p>
+                                    </div> : ""
+                                    }
+                                </div>
+                            ))}
+                        </div>}
+
+                    </div>
+
+                </HashRouter>
+            </div>
+        </FluentProvider>
+    );
 };
