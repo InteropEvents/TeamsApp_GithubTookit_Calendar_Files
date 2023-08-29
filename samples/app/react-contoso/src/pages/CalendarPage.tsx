@@ -2,7 +2,7 @@ import * as React from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Agenda, Get } from '@microsoft/mgt-react';
 import { useState, useEffect } from 'react';
-import { Providers, ProviderState } from '@microsoft/mgt';
+import { Providers, ProviderState} from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular } from '@fluentui/react-icons';
@@ -18,7 +18,7 @@ import {
     mergeClasses
 } from '@fluentui/react-components';
 import { IconButton, ProgressIndicator } from '@fluentui/react';
-
+//import { apiKey } from '../Config';
 import PubSub from 'pubsub-js';
 
 initializeIcons();
@@ -50,7 +50,17 @@ const useStyles = makeStyles({
     mainButton: {
         display: 'flex',
         justifyContent: 'space-between'
-    }
+    },
+    loading: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '4vh'
+    },
+
+    loadingMessage: {
+        paddingLeft: '10px'
+    },
 
 });
 
@@ -152,8 +162,8 @@ export const CalendarPage: React.FunctionComponent = () => {
                             <Button appearance='transparent' className="to_left" icon={<ArrowCircleLeft48Regular />} style={{ fontSize: '20px' }}
                                 onClick={handlePreviousCalendar}
                             >Previous week</Button>
-                            <Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}
-                            >Show API</Button>
+                            {/*<Button appearance='transparent' style={{ fontSize: '20px' }} onClick={() => { setHandleRemoveAPI(true); }}*/}
+                            {/*>Show API</Button>*/}
                             <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{ float: "right", fontSize: '20px' }} onClick={handleNextCalendar}
                             >Next week</Button>
                         </div>
@@ -200,6 +210,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
     Providers.globalProvider.setState(ProviderState.SignedIn);
     // Get Token
     const token = Providers.globalProvider.getAccessToken();
+
     const options = {
         authProvider: done => {
             done(null, token);
@@ -242,7 +253,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 setIsLoading(false);
             }
         }, 8500);
-        let apiCon: Array<{ api: string; type: string; }> = [];
+        //let apiCon: Array<{ api: string; type: string; }> = [];
+        let getAPIcontent: Array<{ api: string; type: string; }> = [];
+       
         event.preventDefault();
         Providers.globalProvider.setState(ProviderState.SignedIn);
         // Get Token
@@ -253,6 +266,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             }
         };
         const client = Client.init(options);
+        
         let joinUrl = currentEvent.onlineMeeting.joinUrl;
         // get onlineMeetingID
         const onlineMeetings = await client
@@ -260,11 +274,18 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             .version('beta')
             .filter(`joinWebUrl eq '${joinUrl}'`)
             .get();
-        apiCon.push({
+        //apiCon.push({
+        //    api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
+        //    type: "GET"
+        //});
+        //PubSub.publish("updateToastProps", apiCon);
+        let apiCon = [{
             api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
             type: "GET"
-        });
-        PubSub.publish("updateToastProps", apiCon);
+        }];
+        getAPIcontent.push(apiCon[0]);
+
+        PubSub.publish("updateToastProps", [...getAPIcontent]);
         const meeting = onlineMeetings.value[0];
         const userId = meeting.participants.organizer.identity.user.id;
 
@@ -272,11 +293,13 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             const meeting = onlineMeetings.value[0];
             const meetingId = meeting.id;
             const transcripts = await client.api(`me/onlineMeetings/${meetingId}/transcripts`).version('beta').get();
-            apiCon.push({
+            let apiCon = [{
                 api: "https://graph.microsoft.com/beta/me/onlineMeetings/" + meetingId + "/transcripts'",
                 type: "GET"
-            });
-            PubSub.publish("updateToastProps", apiCon);
+            }];
+            getAPIcontent.push(apiCon[0]);
+
+            PubSub.publish("updateToastProps", [...getAPIcontent]);
             if (transcripts && transcripts.value.length > 0) {
                 const transcriptId = transcripts.value[0].id;
                 const transcriptContentUrl = transcripts.value[0].transcriptContentUrl;
@@ -284,11 +307,13 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 const axios = require('axios');
                 const getTranscriptContent = async () => {
                     try {
-                        apiCon.push({
+                        let apiCon = [{
                             api: `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             type: "GET"
-                        });
-                        PubSub.publish("updateToastProps", apiCon);
+                        }];
+                        getAPIcontent.push(apiCon[0]);
+
+                        PubSub.publish("updateToastProps", [...getAPIcontent]);
                         const response = await axios.get(
                             `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             {
@@ -344,7 +369,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             {
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'api-key': '5402ecbeeab345b2ae7f52cd1bbe8b46'
+                                     'api-key': '5402ecbeeab345b2ae7f52cd1bbe8b46'
+                                   
                                 }
                             }
                         );

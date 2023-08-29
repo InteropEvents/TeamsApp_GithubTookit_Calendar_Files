@@ -135,7 +135,7 @@ export const Layout: React.FunctionComponent = theme => {
                                 <Route path="*" component={HomePage} />
                             </Switch>
                         </div>
-                        {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px" }}>
+                        {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
                             <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
                             <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
                             <p></p>
