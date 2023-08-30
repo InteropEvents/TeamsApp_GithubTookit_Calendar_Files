@@ -2,7 +2,7 @@ import * as React from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Agenda, Get } from '@microsoft/mgt-react';
 import { useState, useEffect } from 'react';
-import { Providers, ProviderState} from '@microsoft/mgt';
+import { Providers, ProviderState } from '@microsoft/mgt';
 import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular, ChevronDown48Regular } from '@fluentui/react-icons';
@@ -63,7 +63,7 @@ const useStyles = makeStyles({
     },
 
 });
-
+let getAPIcontent: Array<{ api: string; type: string; }> = [];
 export const CalendarPage: React.FunctionComponent = () => {
     const styles = useStyles();
     const [selectedTab, setSelectedTab] = React.useState<TabValue>('focused');
@@ -78,9 +78,16 @@ export const CalendarPage: React.FunctionComponent = () => {
     const [butNex, buttonTime] = useState(1);
     const [getEnd, setEnddatetimeData] = useState(enddatetimeData);
     const [getStart, setStartdatetimeData] = useState(startdatetimeData);
-    const [showApiModal, setShowApiModal] = useState(false);
-    const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
+    const [showApiModal, setShowApiModal] = useState(true);
+    /*   const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);*/
+   
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
+    // 子组件触发父组件
+    const APIcontent = (message) => {
+        /* setAPIcontent((getAPIcontent) => [...getAPIcontent, ...message]);*/
+        getAPIcontent.push(message);
+
+    };
 
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
         setSelectedTab(data.value);
@@ -107,9 +114,9 @@ export const CalendarPage: React.FunctionComponent = () => {
             api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + getEnd + "&enddatetime=" + enddatetimeData,
             type: "GET"
         }];
-        getAPIcontent.push(apiCo[0])
-
+       getAPIcontent.push(apiCo[0]);
         PubSub.publish("updateToastProps", [...getAPIcontent]);
+
     };
 
     const handlePreviousCalendar = () => {
@@ -131,7 +138,7 @@ export const CalendarPage: React.FunctionComponent = () => {
                 type: "GET",
             },
         ];
-        getAPIcontent.push(apiCo[0])
+        getAPIcontent.push(apiCo[0]);
         PubSub.publish("updateToastProps", [...getAPIcontent]);
     };
 
@@ -147,16 +154,13 @@ export const CalendarPage: React.FunctionComponent = () => {
         }];
         getAPIcontent.push(apiCo[0])
         PubSub.publish("updateToastProps", [...getAPIcontent]);
-    }
-
-    // 子组件触发父组件
-    const APIcontent = (message) => {
-        setAPIcontent((getAPIcontent) => [...getAPIcontent, ...message]);
     };
+
+
 
     // Close And Clear APIContent
     const handleRemoveAPI = () => {
-        setAPIcontent([]);
+
         setHandleRemoveAPI(false);
     };
 
@@ -165,6 +169,16 @@ export const CalendarPage: React.FunctionComponent = () => {
         startdatetimeData = getStart;
     }, [currentDate, butNex, getEnd, getStart]);
 
+    React.useEffect(() => {
+        const subscriptionToken = PubSub.subscribe('ClearAPIdata', async (topic, data) => {
+
+            getAPIcontent = [];
+         
+        });
+        return () => {
+            PubSub.unsubscribe(subscriptionToken);
+        };
+    })
     return (
         <>
             <div style={{ display: "flex" }}>
@@ -195,7 +209,7 @@ export const CalendarPage: React.FunctionComponent = () => {
                 </div>
                 {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid #000", padding: "5px" }}>
                     <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
-                    <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
+                    <button style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
                     <p></p>
                     {getAPIcontent.map((tag, index) => (
                         <div key={index}>
@@ -216,11 +230,13 @@ export const CalendarPage: React.FunctionComponent = () => {
 interface CalendarTemplateProps extends MgtTemplateProps {
     onEventReceived: (event: any) => void;
 }
+
 const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, dataContext }) => {
 
     const [isLoading, setIsLoading] = useState(false); //Loading...
     const currentEvent = dataContext.event;
     const [data, setData] = useState(false);
+
     let showClickMe = currentEvent.location.uniqueId === "Microsoft Teams Meeting";
 
     Providers.globalProvider.setState(ProviderState.SignedIn);
@@ -258,7 +274,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
     }, []);
 
     const buttonHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
-
         setIsLoading(true);
         // 模拟异步请求
         setTimeout(() => {
@@ -268,10 +283,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             if (data) {
                 setIsLoading(false);
             }
-        }, 8500);
+        }, 8888);
         //let apiCon: Array<{ api: string; type: string; }> = [];
         let getAPIcontent: Array<{ api: string; type: string; }> = [];
-       
         event.preventDefault();
         Providers.globalProvider.setState(ProviderState.SignedIn);
         // Get Token
@@ -282,7 +296,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             }
         };
         const client = Client.init(options);
-        
         let joinUrl = currentEvent.onlineMeeting.joinUrl;
         // get onlineMeetingID
         const onlineMeetings = await client
@@ -300,11 +313,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             type: "GET"
         }];
         getAPIcontent.push(apiCon[0]);
-
         PubSub.publish("updateToastProps", [...getAPIcontent]);
         const meeting = onlineMeetings.value[0];
         const userId = meeting.participants.organizer.identity.user.id;
-
         if (onlineMeetings && onlineMeetings.value.length > 0) {
             const meeting = onlineMeetings.value[0];
             const meetingId = meeting.id;
@@ -314,7 +325,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 type: "GET"
             }];
             getAPIcontent.push(apiCon[0]);
-
             PubSub.publish("updateToastProps", [...getAPIcontent]);
             if (transcripts && transcripts.value.length > 0) {
                 const transcriptId = transcripts.value[0].id;
@@ -328,7 +338,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             type: "GET"
                         }];
                         getAPIcontent.push(apiCon[0]);
-
                         PubSub.publish("updateToastProps", [...getAPIcontent]);
                         const response = await axios.get(
                             `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
@@ -374,10 +383,13 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         stop: null
                     };
                     try {
-                        apiCon.push({
+                        let apiCon = [{
                             api: `https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview`,
                             type: "POST"
-                        });
+                        }];
+                        getAPIcontent.push(apiCon[0]);
+
+                        PubSub.publish("updateToastProps", [...getAPIcontent]);
                         onEventReceived(apiCon);
                         const response = await axios.post(
                             'https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview',
@@ -385,8 +397,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             {
                                 headers: {
                                     'Content-Type': 'application/json',
-                                     'api-key': '5402ecbeeab345b2ae7f52cd1bbe8b46'
-                                   
+                                    'api-key': '5402ecbeeab345b2ae7f52cd1bbe8b46'
+
                                 }
                             }
                         );
@@ -407,11 +419,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             dialog.style.alignItems = 'center';
                             dialog.style.borderRadius = '24px';
 
-                            const title = document.createElement('h3');
-                            title.textContent = 'Open AI says';
-                            title.style.fontWeight = 'bold';
-                            title.style.marginBottom = '5px';
-
                             const text = document.createElement('span');
                             text.textContent = content;
 
@@ -424,7 +431,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                                 document.body.removeChild(dialog);
                             });
 
-                            dialog.appendChild(title);
                             dialog.appendChild(text);
                             dialog.appendChild(button);
                             document.body.appendChild(dialog);

@@ -60,26 +60,36 @@ export const Layout: React.FunctionComponent = theme => {
     const [isSignedIn] = useIsSignedIn();
     const appContext = useAppContext();
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
-    const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);
+     const [getAPIcontent, setAPIcontent] = useState<any[]>([]);
+    //const [getAPIcontent, setAPIcontent] = useState<any[]>([]);
+    
     const handleRemoveAPI = () => {
-        if (getAPIcontent.length > 0) {
+        if (getAPIcontent.length >= 0) {
+            setHandleRemoveAPI(false); //Success Close，When Content is null
             setAPIcontent([]);
-            setHandleRemoveAPI(false);
-            console.log("API content cleared!");
         }
-    }
+    };
+
+    const handleClearAPI = () => { 
+        setAPIcontent([]);
+        PubSub.publish("ClearAPIdata", []);
+    };
 
     React.useEffect(() => {
         setNavigationItems(getNavigation(isSignedIn));
-        const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
-            setAPIcontent(data);
-            console.log(data)
+       
+    }, [isSignedIn]);
 
+    React.useEffect(() => {
+        const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
+            console.log("data", data, "getAPIcontent", getAPIcontent);
+            setAPIcontent([...data, ...getAPIcontent]);
+           /* setAPIcontent(data);*/
         });
         return () => {
             PubSub.unsubscribe(subscriptionToken);
         };
-    }, [isSignedIn]);
+    });
 
     React.useEffect(() => {
         // Applies the theme to the MGT components
@@ -135,20 +145,23 @@ export const Layout: React.FunctionComponent = theme => {
                                 <Route path="*" component={HomePage} />
                             </Switch>
                         </div>
-                        {getHandleRemoveAPI && <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
-                            <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
-                            <button onClick={() => setAPIcontent([])} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
-                            <p></p>
-                            {getAPIcontent.map((tag, index) => (
-                                <div key={index}>
-                                    {tag.type === 'GET' || tag.type === 'POST' ? <div style={{ borderBottom: "2px solid  #ccc", paddingBottom: "20px" }}>
-                                        <span><b>{tag.type}</b></span>
-                                        <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>{tag.api}</p>
-                                    </div> : ""
-                                    }
-                                </div>
-                            ))}
-                        </div>}
+                        {getHandleRemoveAPI && (
+                            <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
+                                <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
+                                <button onClick={() => { handleClearAPI() }} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
+                                <p></p>
+                                {getAPIcontent.map((tag, index) => (
+                                    <div key={index}>
+                                        {tag.type === 'GET' || tag.type === 'POST' ? (
+                                            <div style={{ borderBottom: "2px solid  #ccc", paddingBottom: "20px" }}>
+                                                <span><b>{tag.type}</b></span>
+                                                <p style={{ margin: "0px", wordBreak: "break-all" }}><b>api:</b>{tag.api}</p>
+                                            </div>
+                                        ) : ""}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                     </div>
 
