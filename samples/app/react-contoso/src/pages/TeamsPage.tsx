@@ -35,7 +35,7 @@ const useStyles = makeStyles({
     '--file-list-box-shadow': 'none'
   }
 });
-
+let getAPIcontent: Array<{ api: string; type: string; }> = [];
 const ChannelsTree = (props) => {
   const [channels, setChannels] = React.useState<Channel[]>([]);
   const [loading , setLoading] = React.useState(false);
@@ -224,13 +224,22 @@ const blobToBase64 = (blob: Blob) => {
   });
 };
 
+const APIcontent = (message) => {
+    /* setAPIcontent((getAPIcontent) => [...getAPIcontent, ...message]);*/
+    getAPIcontent.push(message);
+};
+
 const getAllMyTeams = async (graph: IGraph, scopes: string[]) => {
   const teams = await graph
     .api('/me/joinedTeams')
     .select(['displayName', 'id'])
     .middlewareOptions(prepScopes(...scopes))
     .get();
-
+    let apiCon = [{
+        api: "https://graph.microsoft.com/beta//me/joinedTeams$select=displayName,id/",
+        type: "GET"
+    }];
+    PubSub.publish("updateToastProps", apiCon);
   return teams?.value || [];
 };
 
@@ -240,8 +249,14 @@ const getTeamPhoto = async (graph: IGraph, teamId: string, scopes: string[]) => 
     .responseType(ResponseType.RAW)
     .middlewareOptions(prepScopes(...scopes))
     .get()
-  ) as Response;
-
+    ) as Response;
+    //Delete comments when display API
+    //let apiCon = [{
+    //    api: "https://graph.microsoft.com/beta/teams/"+ teamId+"/photo/$value/",
+    //    type: "GET"
+    //}];
+    ////getAPIcontent.push(apiCon[0]);
+    //PubSub.publish("updateToastProps", apiCon);
   const blob = await blobToBase64(await response.blob());
   return blob;
 };
@@ -250,7 +265,13 @@ const getChannelsByTeam = async (graph: IGraph, teamId, scopes: string[]) => {
   const channels = await graph
     .api(`/teams/${teamId}/channels`)
     .middlewareOptions(prepScopes(...scopes))
-    .get();
-
+        .get();
+    //Delete comments when display API
+    let apiCon = [{
+        api: "https://graph.microsoft.com/beta//teams/"+ teamId+"/channels",
+        type: "GET"
+    }];
+    //getAPIcontent.push(apiCon[0]);
+    PubSub.publish("updateToastProps", apiCon);
   return channels?.value || [];
 }

@@ -58,37 +58,25 @@ export const ThemeSwitcher = () => {
     const [getStart, setStartdatetimeData] = useState(startdatetimeData);
     const [butNex, buttonTime] = useState(1);
     const [refreshKey, setRefreshKey] = useState(0);
-    /*    const [width, setWidth] = useState("100%");*/
-    // 子组件触发父组件
-    //const APIcontent = (message) => {
-    //    setAPIcontent(getAPIcontent => getAPIcontent.concat(message));
-    //};
-
-
-    //token: string | PubSubJS.SubscriptionListener<any> = '';
     const [token, setToken] = React.useState<string | PubSubJS.SubscriptionListener<any>>('');
 
     React.useEffect(() => {
 
         const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
             setAPIcontent(data);
-
         });
-
         return () => {
             PubSub.unsubscribe(subscriptionToken);
         };
     }, []);
+   
     //Close And Clear APIContent
     const handleRemoveAPI = () => {
         setAPIcontent([]);
         setHandleRemoveAPI(false);
        
     }
-    //const handleButtonClick = () => {
-    //    setHandleRemoveAPI(true);
-    //    setWidth("55%");
-    //};
+ 
     const onThemeChanged = (theme: any) => {
         setSelectedTheme(theme);
         // Applies the theme to the Fluent UI components

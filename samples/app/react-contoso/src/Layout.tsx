@@ -55,7 +55,7 @@ const useStyles = makeStyles({
 
 export const Layout: React.FunctionComponent = theme => {
     const styles = useStyles();
-
+    //const scrollRef: React.RefObject<HTMLDivElement> = useRef(null);
     const [navigationItems, setNavigationItems] = React.useState<NavigationItem[]>([]);
     const [isSignedIn] = useIsSignedIn();
     const appContext = useAppContext();
@@ -68,12 +68,15 @@ export const Layout: React.FunctionComponent = theme => {
             setHandleRemoveAPI(false); //Success Close，When Content is null
             setAPIcontent([]);
         }
+
+       
     };
 
     const handleClearAPI = () => { 
         setAPIcontent([]);
         PubSub.publish("ClearAPIdata", []);
     };
+   
 
     React.useEffect(() => {
         setNavigationItems(getNavigation(isSignedIn));
@@ -84,7 +87,14 @@ export const Layout: React.FunctionComponent = theme => {
         const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
             console.log("data", data, "getAPIcontent", getAPIcontent);
             setAPIcontent([...data, ...getAPIcontent]);
-           /* setAPIcontent(data);*/
+            /* setAPIcontent(data);*/
+            //scrollbar change
+            /*if (scrollRef.current) {
+                const { scrollTop, scrollHeight } = scrollRef.current;
+                if (scrollTop !== undefined && scrollHeight !== undefined) {
+                    scrollRef.current.scrollTop = scrollHeight;
+                }
+            }*/
         });
         return () => {
             PubSub.unsubscribe(subscriptionToken);
@@ -146,7 +156,7 @@ export const Layout: React.FunctionComponent = theme => {
                             </Switch>
                         </div>
                         {getHandleRemoveAPI && (
-                            <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
+                            <div  style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
                                 <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
                                 <button onClick={() => { handleClearAPI() }} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
                                 <p></p>

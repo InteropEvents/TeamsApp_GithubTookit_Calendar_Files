@@ -8,19 +8,29 @@ const useStyles = makeStyles({
     display: 'block'
   }
 });
-
+let getAPIcontent: Array<{ api: string; type: string; }> = [];
 export const SiteFiles: React.FunctionComponent = () => {
   const [selectedList, setSelectedList] = React.useState<any>(null);
   const [driveId, setDriveId] = React.useState<string>('');
   const [error, setError] = React.useState<string>('');
   const styles = useStyles();
 
+    //const APIcontent = (message) => {
+    //    getAPIcontent.push(message);
+    //};
   const onSelectionChanged = async (e: CustomEvent) => {
     if (e.detail.list.template === 'documentLibrary') {
-      const drive = await Providers.globalProvider.graph.client.api(`/sites/root/lists/${e.detail.id}/drive`).get();
+        const drive = await Providers.globalProvider.graph.client.api(`/sites/root/lists/${e.detail.id}/drive`).get();
+        
       setSelectedList(e.detail);
       setDriveId(drive.id);
-      setError('');
+        setError('');
+        //let apiCon = [{
+        //    api: " https://graph.microsoft.com/v1.0/me/sites/root/lists/"+ e.detail.id +"/drive",
+        //    type: "GET"
+        //}];
+        ////getAPIcontent.push(apiCon[0]);
+        //PubSub.publish("updateToastProps", apiCon);
     } else {
       setSelectedList(null);
       setDriveId('');
@@ -29,7 +39,7 @@ export const SiteFiles: React.FunctionComponent = () => {
   };
 
   return (
-    <div>
+    <div> 
       <Picker
         resource="/sites/root/lists"
         placeholder="Select a list"

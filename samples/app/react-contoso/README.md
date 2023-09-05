@@ -4,11 +4,17 @@ This sample demonstrates the integration of the Microsoft Graph Toolkit into a f
 
 The sample uses the library [@microsoft/mgt-react](https://www.npmjs.com/package/@microsoft/mgt-react) to simplify usage of [Microsoft Graph Toolkit (mgt)](https://aka.ms/mgt) web components in React. The library wraps all mgt components and exports them as React components.
 
+## Prerequisites
+1. Microsoft 365 Developer Account
+2. Node.js and yarn installed
+3. Register your APP and get your own Application (Client ID). For more details, Please refer to this page: https://learn.microsoft.com/en-us/azure/healthcare-apis/register-application
 ## Setting up this sample
 
-1. Copy the `.env.sample` to its own `.env` file
-1. Add your own values in the file for `REACT_APP_CLIENT_ID`
-1. Install the dependencies with `yarn`
+1. Clone this demo samples from github repo
+2. run `cd samples/app/react-contoso` to demo app folder
+3. Copy the `.env.sample` to its own `.env` file
+4. Add your own Application (Client ID) in the file for `REACT_APP_CLIENT_ID`
+5. Install the dependencies with `yarn`
 
 ## Available Scripts
 
