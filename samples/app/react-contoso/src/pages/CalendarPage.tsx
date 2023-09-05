@@ -7,7 +7,6 @@ import { MgtTemplateProps } from '@microsoft/mgt-react';
 import { Client } from '@microsoft/microsoft-graph-client';
 import { ArrowCircleLeft48Regular, ArrowCircleRight48Regular, ChevronDown48Regular } from '@fluentui/react-icons';
 import { initializeIcons } from '@fluentui/font-icons-mdl2';
-
 import {
     SelectTabData,
     SelectTabEvent,
@@ -18,7 +17,6 @@ import {
     mergeClasses
 } from '@fluentui/react-components';
 import { IconButton, ProgressIndicator } from '@fluentui/react';
-//import { apiKey } from '../Config';
 import PubSub from 'pubsub-js';
 
 initializeIcons();
@@ -61,32 +59,30 @@ const useStyles = makeStyles({
     loadingMessage: {
         paddingLeft: '10px'
     },
-
 });
+
 let getAPIcontent: Array<{ api: string; type: string; }> = [];
 export const CalendarPage: React.FunctionComponent = () => {
-
-
     const styles = useStyles();
     const [selectedTab, setSelectedTab] = React.useState<TabValue>('focused');
     const [currentDate, setCurrentDate] = React.useState<Date>(new Date());
     const nextDateItme = new Date();
     const MondayGet = nextDateItme.setDate(nextDateItme.getDate() - nextDateItme.getDay() + 1)
     const today = new Date();
-    //let startdatetimeData = today.toISOString().substr(0, 10);
     let startdatetimeData = new Date(MondayGet).toISOString().substr(0, 10);
     let enddatetimeData = new Date(new Date(MondayGet).setDate(new Date(MondayGet).getDate() + 6)).toISOString().substr(0, 10);
-    const [refreshKey, setRefreshKey] = useState(0);
-    const [butNex, buttonTime] = useState(1);
+    
     const [getEnd, setEnddatetimeData] = useState(enddatetimeData);
     const [getStart, setStartdatetimeData] = useState(startdatetimeData);
-    const [showApiModal, setShowApiModal] = useState(true);
-    /*   const [getAPIcontent, setAPIcontent] = useState(Array<{ api: string; type: string; }>);*/
+    const newEndDate = new Date(getEnd);
+    newEndDate.setDate(newEndDate.getDate() + 1);
+    const updatedEnddatetimeData = newEndDate.toISOString().substr(0, 10);
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [butNex, buttonTime] = useState(1);
 
+    const [showApiModal, setShowApiModal] = useState(true);
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
-    // 子组件触发父组件
     const APIcontent = (message) => {
-        /* setAPIcontent((getAPIcontent) => [...getAPIcontent, ...message]);*/
         getAPIcontent.push(message);
     };
     const onTabSelect = (event: SelectTabEvent, data: SelectTabData) => {
@@ -102,30 +98,34 @@ export const CalendarPage: React.FunctionComponent = () => {
 
     const handleNextCalendar = () => {
         const nextDate = new Date(getEnd);
-        nextDate.setDate(nextDate.getDate() + 7); //NextWeek
-        // setCurrentDate(nextDate);
+        nextDate.setUTCDate(nextDate.getUTCDate() + 7); // 增加7天
         buttonTime(1);
-        enddatetimeData = new Date(nextDate).toISOString();
+        const enddatetimeData = nextDate.toISOString().substr(0, 10);
         setEnddatetimeData(enddatetimeData);
-        setStartdatetimeData(getEnd);
+        const startdatetime = new Date(getEnd);
+        startdatetime.setDate(startdatetime.getDate() + 1);
+        const startdatetimeData = startdatetime.toISOString().substr(0, 10);
+        setStartdatetimeData(startdatetimeData);
         setRefreshKey(refreshKey + 1);
         let apiCo = [{
-            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + getEnd + "&enddatetime=" + enddatetimeData,
+            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + enddatetimeData,
             type: "GET"
         }];
-        //getAPIcontent.push(apiCo[0]);
-        PubSub.publish("updateToastProps", apiCo);
-
+        console.log("Calendar", apiCo);
+        PubSub.publish("Calendar", apiCo);
     };
 
     const handlePreviousCalendar = () => {
         const previousDate = new Date(getStart);
         previousDate.setDate(previousDate.getDate() - 7); // PreWeek
-        // setCurrentDate(previousDate);
         buttonTime(0);
-        startdatetimeData = new Date(previousDate).toISOString();
-        setEnddatetimeData(getStart);
+        const startdatetimeData = previousDate.toISOString().substr(0, 10);
         setStartdatetimeData(startdatetimeData);
+        
+        const enddatetimeData = new Date(previousDate);
+        enddatetimeData.setDate(enddatetimeData.getDate() + 6);
+        const enddatetimeDataFormatted = enddatetimeData.toISOString().substr(0, 10);
+        setEnddatetimeData(enddatetimeDataFormatted); //Modify Format
         setRefreshKey(refreshKey + 1);
         let apiCo = [
             {
@@ -133,25 +133,26 @@ export const CalendarPage: React.FunctionComponent = () => {
                     "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" +
                     startdatetimeData +
                     "&enddatetime=" +
-                    getStart,
+                    enddatetimeDataFormatted,
                 type: "GET",
             },
         ];
-        PubSub.publish("updateToastProps", apiCo);
+        PubSub.publish("Calendar", apiCo);
     };
 
     const handleToday = () => {
-        const thisWeek = today.setDate(today.getDate() - today.getDay() + 1);
-        let startdatetimeData = new Date(thisWeek).toISOString().substr(0, 10);
+        const today = new Date();
+        const thisWeek = today.getUTCDate() - today.getUTCDay() + 1; // Monday
+        const startdatetimeData = new Date(today.setUTCDate(thisWeek)).toISOString().substr(0, 10);
         setStartdatetimeData(startdatetimeData);
-        let enddatetimeData = new Date(new Date(thisWeek).setDate(new Date(thisWeek).getDate() + 6)).toISOString().substr(0, 10);
+        const enddatetimeData = new Date(today.setUTCDate(thisWeek + 6)).toISOString().substr(0, 10); // Sunday
         setEnddatetimeData(enddatetimeData);
         setRefreshKey(refreshKey + 1);
         let apiCo = [{
             api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + enddatetimeData,
             type: "GET"
-        }]; 
-        PubSub.publish("updateToastProps", apiCo);
+        }];
+        PubSub.publish("Calendar", apiCo);
     };
 
     // Close And Clear APIContent
@@ -165,15 +166,20 @@ export const CalendarPage: React.FunctionComponent = () => {
     }, [currentDate, butNex, getEnd, getStart]);
     //send data
     React.useEffect(() => {
+        //send and show calendar All API 
+        let apiCo = [{
+            api: "https://graph.microsoft.com/v1.0/me/calendarview?$orderby=start/dateTime&startdatetime=" + startdatetimeData + "&enddatetime=" + enddatetimeData,
+            type: "GET"
+        }];
+        PubSub.publish("Calendar", apiCo);
         const subscriptionToken = PubSub.subscribe('ClearAPIdata', async (topic, data) => {
-
             getAPIcontent = [];
-
         });
         return () => {
             PubSub.unsubscribe(subscriptionToken);
         };
-    })
+    }, [])
+
     return (
         <>
             <div style={{ display: "flex" }}>
@@ -192,7 +198,6 @@ export const CalendarPage: React.FunctionComponent = () => {
                             <Button appearance='transparent' icon={<ArrowCircleRight48Regular />} style={{ float: "right", fontSize: '20px' }} onClick={handleNextCalendar}
                             >Next week</Button>
                         </div>
-
                         <div className={mergeClasses(styles.panels, styles.main)}>
                             <Agenda groupByDay={true} id="my-calendar"
                                 key={refreshKey}
@@ -225,28 +230,22 @@ export const CalendarPage: React.FunctionComponent = () => {
 interface CalendarTemplateProps extends MgtTemplateProps {
     onEventReceived: (event: any) => void;
 }
-
 const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, dataContext }) => {
 
     const [isLoading, setIsLoading] = useState(false); //Loading...
     const currentEvent = dataContext.event;
     const [data, setData] = useState(false);
-
     let showClickMe = currentEvent.location.uniqueId === "Microsoft Teams Meeting";
-
     Providers.globalProvider.setState(ProviderState.SignedIn);
     // Get Token
     const token = Providers.globalProvider.getAccessToken();
-
     const options = {
         authProvider: done => {
             done(null, token);
         }
     };
-
     const client = Client.init(options);
     useEffect(() => {
-        // 调用接口，模拟异步获取数据
         if (currentEvent.location.uniqueId === "Microsoft Teams Meeting") {
             let joinUrl = currentEvent.onlineMeeting.joinUrl;
             const onlineMeetings = client
@@ -269,19 +268,14 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
         }
     }, []);
 
-
     const buttonHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
         setIsLoading(true);
-        // 模拟异步请求
         setTimeout(() => {
-            // 获取到数据后停止转圈效果
             setIsLoading(false);
-            // 处理数据
             if (data) {
                 setIsLoading(false);
             }
         }, 8888);
-        //let apiCon: Array<{ api: string; type: string; }> = [];
         let getAPIcontent: Array<{ api: string; type: string; }> = [];
         event.preventDefault();
         Providers.globalProvider.setState(ProviderState.SignedIn);
@@ -300,16 +294,11 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             .version('beta')
             .filter(`joinWebUrl eq '${joinUrl}'`)
             .get();
-        //apiCon.push({
-        //    api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
-        //    type: "GET"
-        //});
-        //PubSub.publish("updateToastProps", apiCon);
         let apiCon = [{
             api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
             type: "GET"
         }];
-        PubSub.publish("updateToastProps", apiCon);
+        PubSub.publish("Calendar", apiCon);
         const meeting = onlineMeetings.value[0];
         const userId = meeting.participants.organizer.identity.user.id;
         if (onlineMeetings && onlineMeetings.value.length > 0) {
@@ -320,8 +309,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 api: "https://graph.microsoft.com/beta/me/onlineMeetings/" + meetingId + "/transcripts'",
                 type: "GET"
             }];
-      
-            PubSub.publish("updateToastProps", apiCon);
+
+            PubSub.publish("Calendar", apiCon);
             if (transcripts && transcripts.value.length > 0) {
                 const transcriptId = transcripts.value[0].id;
                 const transcriptContentUrl = transcripts.value[0].transcriptContentUrl;
@@ -333,8 +322,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             api: `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             type: "GET"
                         }];
-                     
-                        PubSub.publish("updateToastProps", apiCon);
+
+                        PubSub.publish("Calendar", apiCon);
                         const response = await axios.get(
                             `https://graph.microsoft.com/beta/users/${userId}/onlineMeetings/${meetingId}/transcripts/${transcriptId}/content?$format=text/vtt`,
                             {
@@ -383,7 +372,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             api: `https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview`,
                             type: "POST"
                         }];
-                        PubSub.publish("updateToastProps", apiCon);
+                        PubSub.publish("Calendar", apiCon);
                         onEventReceived(apiCon);
                         const response = await axios.post(
                             'https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview',
@@ -391,7 +380,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             {
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'api-key': '5402ecbeeab345b2ae7f52cd1bbe8b46'
+                                    'api-key': process.env.REACT_APP_API_KEY
                                 }
                             }
                         );

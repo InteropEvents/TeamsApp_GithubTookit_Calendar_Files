@@ -14,7 +14,8 @@ The sample uses the library [@microsoft/mgt-react](https://www.npmjs.com/package
 2. run `cd samples/app/react-contoso` to demo app folder
 3. Copy the `.env.sample` to its own `.env` file
 4. Add your own Application (Client ID) in the file for `REACT_APP_CLIENT_ID`
-5. Install the dependencies with `yarn`
+5. Add your own Open AI API_KEY in the file for `REACT_APP_API_KEY`
+6. Install the dependencies with `yarn`
 
 ## Available Scripts
 

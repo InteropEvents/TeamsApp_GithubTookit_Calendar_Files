@@ -4,6 +4,8 @@ import { Layout } from './Layout';
 import { webLightTheme } from '@fluentui/react-components';
 
 export const App: React.FunctionComponent = theme => {
+
+
   const [state, setState] = React.useState({
     searchTerm: '*',
     sidebar: {
@@ -12,9 +14,11 @@ export const App: React.FunctionComponent = theme => {
     theme: { key: 'light', fluentTheme: webLightTheme }
   });
 
-  return (
+    return (
+
     <AppContext.Provider value={{ state, setState }}>
       <Layout />
-    </AppContext.Provider>
+        </AppContext.Provider>
+
   );
 };

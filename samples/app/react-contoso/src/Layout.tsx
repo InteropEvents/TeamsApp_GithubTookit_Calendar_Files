@@ -16,85 +16,71 @@ import {
     MenuButton,
 } from '@fluentui/react-components';
 const useStyles = makeStyles({
-  sidebar: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexWrap: 'nowrap',
-    height: '100%',
-    minWidth: '295px',
-    boxSizing: 'border-box',
-    backgroundColor: tokens.colorNeutralBackground6
-  },
-  main: {
-    backgroundColor: tokens.colorNeutralBackground1,
-    display: 'flex',
-    flexDirection: 'row',
-    width: 'auto',
-    height: 'calc(100vh - 50px)',
-    boxSizing: 'border-box'
-  },
-  minimized: {
-    minWidth: 'auto'
-  },
-  page: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexWrap: 'nowrap'
-  },
-  content: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexWrap: 'nowrap',
-    width: '100%',
-    height: 'auto',
-    boxSizing: 'border-box',
-    ...shorthands.margin('10px'),
-    ...shorthands.overflow('auto')
-  }
+    sidebar: {
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'nowrap',
+        height: '100%',
+        minWidth: '295px',
+        boxSizing: 'border-box',
+        backgroundColor: tokens.colorNeutralBackground6
+    },
+    main: {
+        backgroundColor: tokens.colorNeutralBackground1,
+        display: 'flex',
+        flexDirection: 'row',
+        width: 'auto',
+        height: 'calc(100vh - 50px)',
+        boxSizing: 'border-box'
+    },
+    minimized: {
+        minWidth: 'auto'
+    },
+    page: {
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'nowrap'
+    },
+    content: {
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'nowrap',
+        width: '100%',
+        height: 'auto',
+        boxSizing: 'border-box',
+        ...shorthands.margin('10px'),
+        ...shorthands.overflow('auto')
+    }
 });
 
 export const Layout: React.FunctionComponent = theme => {
+
     const styles = useStyles();
     //const scrollRef: React.RefObject<HTMLDivElement> = useRef(null);
     const [navigationItems, setNavigationItems] = React.useState<NavigationItem[]>([]);
     const [isSignedIn] = useIsSignedIn();
     const appContext = useAppContext();
     const [getHandleRemoveAPI, setHandleRemoveAPI] = useState(false);
-     const [getAPIcontent, setAPIcontent] = useState<any[]>([]);
-    //const [getAPIcontent, setAPIcontent] = useState<any[]>([]);
-    
+    const [getAPIcontent, setAPIcontent] = useState<any[]>([]);
     const handleRemoveAPI = () => {
         if (getAPIcontent.length >= 0) {
-            setHandleRemoveAPI(false); //Success Close，When Content is null
+            setHandleRemoveAPI(false); 
             setAPIcontent([]);
         }
-
-       
     };
-
-    const handleClearAPI = () => { 
+    const handleClearAPI = () => {
         setAPIcontent([]);
         PubSub.publish("ClearAPIdata", []);
     };
-   
 
     React.useEffect(() => {
         setNavigationItems(getNavigation(isSignedIn));
-       
-    }, [isSignedIn]);
 
+    }, [isSignedIn]);
     React.useEffect(() => {
-        const subscriptionToken = PubSub.subscribe('updateToastProps', async (topic, data) => {
+        const subscriptionToken = PubSub.subscribe('Calendar', async (topic, data) => {
             console.log("data", data, "getAPIcontent", getAPIcontent);
             setAPIcontent([...data, ...getAPIcontent]);
-            /* setAPIcontent(data);*/
-            //scrollbar change
-            /*if (scrollRef.current) {
-                const { scrollTop, scrollHeight } = scrollRef.current;
-                if (scrollTop !== undefined && scrollHeight !== undefined) {
-                    scrollRef.current.scrollTop = scrollHeight;
-                }
-            }*/
         });
         return () => {
             PubSub.unsubscribe(subscriptionToken);
@@ -102,15 +88,12 @@ export const Layout: React.FunctionComponent = theme => {
     });
 
     React.useEffect(() => {
-        // Applies the theme to the MGT components
         applyTheme(appContext.state.theme.key as any);
     }, [appContext]);
     return (
         <FluentProvider theme={appContext.state.theme.fluentTheme}  >
             <div className={styles.page} >
-
                 <HashRouter >
-
                     <div style={{ position: 'relative' }}>
                         <p></p>
                         <MenuButton
@@ -129,13 +112,11 @@ export const Layout: React.FunctionComponent = theme => {
                         </MenuButton>
                         <Header></Header>
                     </div>
-
                     <div className={styles.main}  >
                         <div
                             className={mergeClasses(
                                 styles.sidebar,
                                 `${appContext.state.sidebar.isMinimized ? styles.minimized : ''}`
-
                             )
                             }
                         >
@@ -156,7 +137,7 @@ export const Layout: React.FunctionComponent = theme => {
                             </Switch>
                         </div>
                         {getHandleRemoveAPI && (
-                            <div  style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
+                            <div style={{ width: "800px", lineHeight: "30px", height: "100%", border: "1px solid  #ccc", padding: "5px", overflow: "auto" }}>
                                 <IconButton onClick={() => handleRemoveAPI()} iconProps={{ iconName: 'Cancel' }} style={{ fontSize: '20px', color: 'black', float: 'right' }} />
                                 <button onClick={() => { handleClearAPI() }} style={{ fontSize: '15px', color: 'black', width: "80px", height: "20px", border: "none", textAlign: "center", backgroundColor: "#dadada", borderRadius: "24px" }} >Clear</button>
                                 <p></p>
@@ -172,9 +153,7 @@ export const Layout: React.FunctionComponent = theme => {
                                 ))}
                             </div>
                         )}
-
                     </div>
-
                 </HashRouter>
             </div>
         </FluentProvider>
