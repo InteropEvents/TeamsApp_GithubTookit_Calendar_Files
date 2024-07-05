@@ -357,7 +357,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             },
                             {
                                 role: 'user',
-                                content: `Summarize what I've missed and list the action items in bullet points from this transcript ${transcriptContent}`
+                                content: `Summarize what I've missed and list the action items in bullet points from this transcript, content at here: ${transcriptContent}`
                             }
                         ],
                         temperature: 0.7,
@@ -368,19 +368,18 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         stop: null
                     };
                     try {
+                        let apiUrl = `https://${process.env.REACT_APP_OPENAI_RES_NAME}.openai.azure.com/openai/deployments/${process.env.REACT_APP_OPENAI_DEPLOY_ID}/chat/completions?api-version=2024-05-01-preview`
                         let apiCon = [{
-                            api: `https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview`,
+                            api: apiUrl,
                             type: "POST"
                         }];
                         PubSub.publish("Calendar", apiCon);
                         onEventReceived(apiCon);
-                        const response = await axios.post(
-                            'https://atc-openaippe.openai.azure.com/openai/deployments/Tarun-Bot-Test/chat/completions?api-version=2023-03-15-preview',
-                            context,
+                        const response = await axios.post(apiUrl, context,
                             {
                                 headers: {
                                     'Content-Type': 'application/json',
-                                    'api-key': process.env.REACT_APP_API_KEY
+                                    'api-key': process.env.REACT_APP_OPENAI_API_KEY
                                 }
                             }
                         );
