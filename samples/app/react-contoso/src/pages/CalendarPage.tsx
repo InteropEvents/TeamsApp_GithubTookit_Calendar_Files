@@ -250,7 +250,6 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
             let joinUrl = currentEvent.onlineMeeting.joinUrl;
             const onlineMeetings = client
                 .api('me/onlineMeetings')
-                .version('beta')
                 .filter(`joinWebUrl eq '${joinUrl}'`)
                 .get().then(response => {
                     const meeting = response.value[0];
@@ -258,15 +257,17 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                     if (response && response.value.length > 0) {
                         const meeting = response.value[0];
                         const meetingId = meeting.id;
-                        const transcripts = client.api(`me/onlineMeetings/${meetingId}/transcripts`).version('beta').get().then(responses => {
-                            if (responses.value.length > 0) {
-                                setData(true);
-                            }
-                        });
+            const transcripts = client.api(`me/onlineMeetings/${meetingId}/transcripts`).get()
+                .then(responses => {
+                    if (responses.value.length > 0) {
+                        setData(true);
                     }
                 })
-        }
-    }, []);
+                .catch(error => {
+                    console.error("An error occurred, and ignore it:", error);
+                });
+            }})}
+            }, []);
 
     const buttonHandler = async (event: React.MouseEvent<HTMLButtonElement>) => {
         setIsLoading(true);
@@ -291,11 +292,10 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
         // get onlineMeetingID
         const onlineMeetings = await client
             .api('me/onlineMeetings')
-            .version('beta')
             .filter(`joinWebUrl eq '${joinUrl}'`)
             .get();
         let apiCon = [{
-            api: "https://graph.microsoft.com/beta/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
+            api: "https://graph.microsoft.com/me/onlineMeetings?$filter=joinWebUrl eq '" + joinUrl + "'",
             type: "GET"
         }];
         PubSub.publish("Calendar", apiCon);
@@ -304,9 +304,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
         if (onlineMeetings && onlineMeetings.value.length > 0) {
             const meeting = onlineMeetings.value[0];
             const meetingId = meeting.id;
-            const transcripts = await client.api(`me/onlineMeetings/${meetingId}/transcripts`).version('beta').get();
+            const transcripts = await client.api(`me/onlineMeetings/${meetingId}/transcripts`).get();
             let apiCon = [{
-                api: "https://graph.microsoft.com/beta/me/onlineMeetings/" + meetingId + "/transcripts'",
+                api: "https://graph.microsoft.com/me/onlineMeetings/" + meetingId + "/transcripts'",
                 type: "GET"
             }];
 
