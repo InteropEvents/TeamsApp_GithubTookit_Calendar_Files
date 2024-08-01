@@ -29,6 +29,7 @@ Providers.globalProvider = new Msal2Provider({
     'Group.ReadWrite.All',
     'Mail.Read',
     'Mail.ReadBasic',
+    'OnlineMeetingTranscript.Read.All',
     'People.Read',
     'People.Read.All',
     'Presence.Read.All',

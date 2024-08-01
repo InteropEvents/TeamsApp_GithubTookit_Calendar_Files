@@ -231,7 +231,7 @@ const getAllMyTeams = async (graph: IGraph, scopes: string[]) => {
     const teams = await graph
         .api('/me/joinedTeams')
         .select(['displayName', 'id'])
-        .middlewareOptions(prepScopes(...scopes))
+        .middlewareOptions(prepScopes([...scopes]))
         .get();
     let apiCon = [{
         api: "https://graph.microsoft.com/beta//me/joinedTeams$select=displayName,id/",
@@ -245,7 +245,7 @@ const getTeamPhoto = async (graph: IGraph, teamId: string, scopes: string[]) => 
     const response = (await graph
         .api(`/teams/${teamId}/photo/$value`)
         .responseType(ResponseType.RAW)
-        .middlewareOptions(prepScopes(...scopes))
+        .middlewareOptions(prepScopes([...scopes]))
         .get()
     ) as Response;
     let apiCon = [{
@@ -260,7 +260,7 @@ const getTeamPhoto = async (graph: IGraph, teamId: string, scopes: string[]) => 
 const getChannelsByTeam = async (graph: IGraph, teamId, scopes: string[]) => {
     const channels = await graph
         .api(`/teams/${teamId}/channels`)
-        .middlewareOptions(prepScopes(...scopes))
+        .middlewareOptions(prepScopes([...scopes]))
         .get();
     //Delete comments when display API
     let apiCon = [{

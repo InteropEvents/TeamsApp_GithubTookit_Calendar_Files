@@ -1,7 +1,8 @@
 import { SearchResults } from '@microsoft/mgt-react';
 import * as React from 'react';
 import { IResultsProps } from './IResultsProps';
-import { MgtTemplateProps, Person, File, PersonCardInteraction, ViewType } from '@microsoft/mgt-react';
+import { MgtTemplateProps, Person, File, viewTypeConverter } from '@microsoft/mgt-react';
+import { personCardConverter } from '@microsoft/mgt-components/dist/es6/components/PersonCardInteraction';
 import {
   DataGrid,
   DataGridBody,
@@ -101,7 +102,7 @@ const getColumns = (shimmered: boolean, styles): TableColumnDefinition<any>[] =>
               <SkeletonItem shape="rectangle" style={{ width: '120px' }} />
             ) : (
               <div className={styles.fileContainer}>
-                <File fileDetails={item.resource} view={ViewType.image} />
+                <File fileDetails={item.resource} view={viewTypeConverter("image")} />
                 <span className={styles.fileTitle}>{item.resource.listItem.fields.title}</span>
               </div>
             )}
@@ -150,8 +151,8 @@ const getColumns = (shimmered: boolean, styles): TableColumnDefinition<any>[] =>
             ) : (
               <Person
                 personQuery={item.resource.createdBy.user.email}
-                view={ViewType.oneline}
-                personCardInteraction={PersonCardInteraction.hover}
+                view={viewTypeConverter("oneline")}
+                personCardInteraction={personCardConverter("hover")}
               />
             )}
           </TableCellLayout>
