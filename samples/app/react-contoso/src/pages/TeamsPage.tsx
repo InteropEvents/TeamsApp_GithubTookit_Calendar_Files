@@ -198,6 +198,7 @@ export const ChannelFilesPage: React.FunctionComponent = () => {
 
                 {selectedChannelName !== '' ? (
                     <FileList
+                        key={`${selectedTeamId}-${selectedChannelName}`}
                         groupId={selectedTeamId}
                         itemPath={selectedChannelName}
                         pageSize={100}

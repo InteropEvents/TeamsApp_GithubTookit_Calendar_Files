@@ -2917,7 +2917,7 @@
     "@microsoft/mgt-element" "4.2.3"
     "@microsoft/microsoft-graph-client" "3.0.2"
 
-"@microsoft/mgt-react@*":
+"@microsoft/mgt-react@^4.2.3":
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/@microsoft/mgt-react/-/mgt-react-4.2.3.tgz#7100f4541ad999632b946f85103f6c5d07df89d8"
   integrity sha512-dmi1Q7GltbQNjfVqNMw9G/b5QCSN7fgLfynHXgBF98SWRUReVhDUhxN7/FpOOsqE22l9rfjkUIIOhNU94y0acA==
