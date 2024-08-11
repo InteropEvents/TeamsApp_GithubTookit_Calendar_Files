@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { ResponseType } from '@microsoft/microsoft-graph-client';
+// Step1: The equivalent of mgt-file in typescript is FileList. 
 import { MgtTeamsChannelPicker, FileList } from '@microsoft/mgt-react';
 import { makeStyles } from '@fluentui/react-components';
 import { Tree, TreeItem, TreeItemLayout } from '@fluentui/react-tree';
@@ -62,6 +63,9 @@ const ChannelsTree = (props) => {
         }
     }
 
+    // Step3: getSelectedTeamChannel, we firstset TeamId, Channel Name and ChannelId.
+    // Finally, we call GraphAPI to list all the children of a driveitem which will 
+    // fetch all the files in a given channel. 
     const getSelectedTeamChannel = (channelName, channelId) => {
         setSelectedTeamId(teamId);
         setSelectedChannelName(channelName);
@@ -133,6 +137,8 @@ const TeamImg = (props) => {
     );
 }
 
+// Step2: The Graph toolkit does not currently offer any existing components for displaying Teams/Channel views. 
+// Therefore, we developed our own custom component , ChannelFilesPage, to provide this functionality
 //main component
 export const ChannelFilesPage: React.FunctionComponent = () => {
     const provider = Providers.globalProvider;
@@ -196,7 +202,7 @@ export const ChannelFilesPage: React.FunctionComponent = () => {
                 </div>
                 <div className={styles.divider}></div>
 
-                {selectedChannelName !== '' ? (
+                  {selectedChannelName !== '' ? (
                     <FileList
                         key={`${selectedTeamId}-${selectedChannelName}`}
                         groupId={selectedTeamId}

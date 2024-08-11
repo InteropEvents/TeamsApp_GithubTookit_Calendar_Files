@@ -96,6 +96,7 @@ export const CalendarPage: React.FunctionComponent = () => {
         console.error("Promise 发生错误:", error);
     });
 
+    // Step1: handleNextCalendar, we increment date by 7 days and get data 
     const handleNextCalendar = () => {
         const nextDate = new Date(getEnd);
         nextDate.setUTCDate(nextDate.getUTCDate() + 7); // 增加7天
@@ -115,6 +116,8 @@ export const CalendarPage: React.FunctionComponent = () => {
         PubSub.publish("Calendar", apiCo);
     };
 
+
+    // Step2: handlePreviousCalendar, we go back 7 days and get data
     const handlePreviousCalendar = () => {
         const previousDate = new Date(getStart);
         previousDate.setDate(previousDate.getDate() - 7); // PreWeek
@@ -140,6 +143,7 @@ export const CalendarPage: React.FunctionComponent = () => {
         PubSub.publish("Calendar", apiCo);
     };
 
+    // Step3: handleToday, we get data with start date as todays date for next 7 days
     const handleToday = () => {
         const today = new Date();
         const thisWeek = today.getUTCDate() - today.getUTCDay() + 1; // Monday
@@ -230,6 +234,8 @@ export const CalendarPage: React.FunctionComponent = () => {
 interface CalendarTemplateProps extends MgtTemplateProps {
     onEventReceived: (event: any) => void;
 }
+
+// Step4: ChatGPT integration
 const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, dataContext }) => {
 
     const [isLoading, setIsLoading] = useState(false); //Loading...
@@ -304,6 +310,9 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
         if (onlineMeetings && onlineMeetings.value.length > 0) {
             const meeting = onlineMeetings.value[0];
             const meetingId = meeting.id;
+
+            // Step5: 'transcripts' object - Retrieve the list of callTranscript objects associated with a scheduled onlineMeeting. 
+            // This API doesn't support getting call transcripts from channel meetings. 
             const transcripts = await client.api(`me/onlineMeetings/${meetingId}/transcripts`).get();
             let apiCon = [{
                 api: "https://graph.microsoft.com/me/onlineMeetings/" + meetingId + "/transcripts'",
@@ -316,6 +325,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                 const transcriptContentUrl = transcripts.value[0].transcriptContentUrl;
                 //get Summary
                 const axios = require('axios');
+
+                // Step6: Pass the object to get actual meeting transcript content along with meetingid.
                 const getTranscriptContent = async () => {
                     try {
                         let apiCon = [{
@@ -340,6 +351,8 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         return null;
                     }
                 };
+
+                // Step7: Send the transcriptContent to ChatGPT/AOAI for summarization
                 const generateSummary = async () => {
                     const transcriptContent = await getTranscriptContent();
                     if (!transcriptContent) {
@@ -367,6 +380,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         max_tokens: 800,
                         stop: null
                     };
+                    // Step8: AOAI call to get the summary
                     try {
                         let apiUrl = `https://${process.env.REACT_APP_OPENAI_RES_NAME}.openai.azure.com/openai/deployments/${process.env.REACT_APP_OPENAI_DEPLOY_ID}/chat/completions?api-version=2024-05-01-preview`
                         let apiCon = [{
@@ -375,6 +389,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                         }];
                         PubSub.publish("Calendar", apiCon);
                         onEventReceived(apiCon);
+                        // Step9 : 'context' has transcriptContent variable which is the actual transcript content.
                         const response = await axios.post(apiUrl, context,
                             {
                                 headers: {
@@ -384,6 +399,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
                             }
                         );
                         const generatedAnswer = response.data.choices[0].message.content;
+                        console.log(generatedAnswer);
                         alert(generatedAnswer);
 
                     } catch (error) {
@@ -403,6 +419,7 @@ const CalendarTemplate: React.FC<CalendarTemplateProps> = ({ onEventReceived, da
         }
     };
 
+    // Trace showClickMe
     return (
         <div style={{ position: "absolute", right: "0", top: "50%", transform: "translateY(-50%)" }} className="clickButton" >
             {showClickMe && data.valueOf() && (
