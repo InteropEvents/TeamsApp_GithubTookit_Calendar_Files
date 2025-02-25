@@ -20,7 +20,7 @@ Providers.globalProvider = new Msal2Provider({
   redirectUri: window.location.protocol + '//' + window.location.host,
   scopes: [
     'Bookmark.Read.All',
-    'Calendars.Read',
+    'Calendars.ReadWrite',
     'ExternalItem.Read.All',
     'Files.Read',
     'Files.Read.All',
@@ -40,7 +40,7 @@ Providers.globalProvider = new Msal2Provider({
     'Tasks.ReadWrite',
     'Team.ReadBasic.All',
     'User.ReadBasic.All',
-    'User.Read.All'
+    'User.Read.All',
   ]
 });
 
