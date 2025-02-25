@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { ResponseType } from '@microsoft/microsoft-graph-client';
-import { MgtTeamsChannelPicker, FileList } from '@microsoft/mgt-react';
-import { makeStyles } from '@fluentui/react-components';
+import * as MicrosoftGraph from '@microsoft/microsoft-graph-types';
+import { MgtTeamsChannelPicker, FileList, File, MgtTemplateProps } from '@microsoft/mgt-react';
+import { makeStyles, Button } from '@fluentui/react-components';
 import { Tree, TreeItem, TreeItemLayout } from '@fluentui/react-tree';
 import { ChevronRightRegular } from '@fluentui/react-icons';
 import { Team, Channel } from '@microsoft/microsoft-graph-types';
-import { IGraph, prepScopes, Providers } from '@microsoft/mgt-element';
+import { IGraph, prepScopes, Providers, TemplateContext } from '@microsoft/mgt-element';
 import { PageHeader } from '../components/PageHeader';
 import { Loading } from '../components/Loading';
 
@@ -35,6 +36,7 @@ const useStyles = makeStyles({
         '--file-list-box-shadow': 'none'
     }
 });
+
 let getAPIcontent: Array<{ api: string; type: string; }> = [];
 const ChannelsTree = (props) => {
     const [channels, setChannels] = React.useState<Channel[]>([]);
@@ -160,6 +162,67 @@ export const ChannelFilesPage: React.FunctionComponent = () => {
         getTeams();
     }, []);
 
+
+    const [isViewerVisible, setIsViewerVisible] = React.useState(false);
+    const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
+
+    const handleCloseViewer = () => {
+        setIsViewerVisible(false);
+        setPreviewUrl(null);
+    };
+
+    const handlePreviewButtonClick = async (fileItem: MicrosoftGraph.DriveItem) => {
+        if (!fileItem.file) {
+            return;
+        }
+        const parentReference = fileItem.parentReference;
+        if (!parentReference) {
+            return;
+        }
+        const driveId = parentReference.driveId;
+        const itemId = fileItem.id;
+        const previewEndpoint = `https://graph.microsoft.com/v1.0/drives/${driveId}/items/${itemId}/preview`;
+
+        try {
+            const response = await graph.api(previewEndpoint).post({});
+            const previewUrl = response.getUrl;
+            setPreviewUrl(previewUrl);
+            setIsViewerVisible(true);
+        } catch (error) {
+            console.error('Error fetching preview URL:', error);
+        }
+    };
+
+    const FileTemplate = (props: MgtTemplateProps) => {
+        const file = props.dataContext.file as MicrosoftGraph.DriveItem;
+        return <>
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                width: '100%',
+                padding: '8px',
+            }}>
+                <div
+                    onClick={() => {
+                        if (file.webUrl) {
+                            window.open(file.webUrl, '_blank', 'noopener,noreferrer');
+                        }
+                    }}
+                >
+                    <File fileDetails={file}></File>
+                </div>
+                {file.file && (
+                    <Button
+                        onClick={() => handlePreviewButtonClick(file)}
+                    >
+                        Preview
+                    </Button>
+                )}
+            </div>
+        </>
+    };
+
     return (
         <>
             <PageHeader
@@ -203,11 +266,53 @@ export const ChannelFilesPage: React.FunctionComponent = () => {
                         itemPath={selectedChannelName}
                         pageSize={100}
                         className={styles.channelFiles}
+                        disableOpenOnClick={true}
                     >
                         <Loading template='loading'></Loading>
+                        <FileTemplate template='file'></FileTemplate>
                     </FileList>
                 ) : null}
             </div>
+            {isViewerVisible && (
+                <div id="embeddedFileViewer" style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    zIndex: 1000
+                }}>
+                    <Button
+                        appearance="primary"
+                        onClick={handleCloseViewer}
+                        style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            zIndex: 1001
+                        }}
+                    >
+                        Close
+                    </Button>
+                    <div style={{
+                        position: 'absolute',
+                        top: '50px',
+                        left: '50px',
+                        right: '50px',
+                        bottom: '50px',
+                        backgroundColor: 'white',
+                        padding: '20px',
+                        overflow: 'auto'
+                    }}>
+                        {previewUrl ? (
+                            <iframe src={previewUrl} style={{ width: '100%', height: '100%', border: 'none' }}></iframe>
+                        ) : (
+                            <p>Loading preview...</p>
+                        )}
+                    </div>
+                </div>
+            )}
         </>
     );
 }
