@@ -33,6 +33,7 @@ Providers.globalProvider = new Msal2Provider({
     'People.Read',
     'People.Read.All',
     'Presence.Read.All',
+    'Presence.ReadWrite',
     'User.Read',
     'Sites.Read.All',
     'Sites.ReadWrite.All',

@@ -39,6 +39,11 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### `yarn start-server`
+
+Runs the app server side and frontend  in the development mode.<br>
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
 
 ## Learn More
 

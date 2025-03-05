@@ -3,6 +3,7 @@ import { Login, SearchBox } from '@microsoft/mgt-react';
 import { PACKAGE_VERSION } from '@microsoft/mgt-element';
 import { InfoButton } from '@fluentui/react-components/unstable';
 import { SimpleLogin } from './SimpleLogin';
+import { LoginFlyout } from './FlyoutLogin';
 import { useIsSignedIn } from '../hooks/useIsSignedIn';
 import { useHistory } from 'react-router-dom';
 import { ThemeSwitcher } from './ThemeSwitcher';
@@ -159,14 +160,15 @@ const HeaderComponent: React.FunctionComponent = () => {
         
           </div>
       {/*移到最右侧*/}
-          <div className={styles.login} style={{ display: "flex", justifyContent: "flex-end" }}>
-              
+          <div className={styles.login} style={{ display: "flex", justifyContent: "flex-end" }}>          
+
               <ThemeSwitcher />
-             
+
               <div className={mergeClasses(!isSignedIn ? styles.signedOut : styles.signedIn, styles.root)}>
-                  <Login>
-                      <SimpleLogin template="signed-in-button-content" />
-                  </Login>
+                <Login>
+                  <SimpleLogin template="signed-in-button-content" />
+                  <LoginFlyout template="flyout-person-details"/>
+                </Login>
               </div>
           </div>
     </div>

@@ -94,7 +94,7 @@ export const Layout: React.FunctionComponent = theme => {
         <FluentProvider theme={appContext.state.theme.fluentTheme}  >
             <div className={styles.page} >
                 <HashRouter >
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative' ,zIndex:1}}>
                         <p></p>
                         <MenuButton
                             appearance='transparent'
